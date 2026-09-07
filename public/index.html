@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CRUD Template</title>
+</head>
+
+<body>
+
+    <h1>CRUD Template</h1>
+
+    <!-- Login -->
+    <div id="login-box">
+
+        <input type="text" id="username" placeholder="Username">
+
+        <input type="password" id="password" placeholder="Password">
+
+        <button id="login-btn">Login</button>
+
+        <button id="logout-btn" style="display: none;">
+            Logout
+        </button>
+
+    </div>
+
+    <hr>
+
+    <!-- CRUD area -->
+    <div id="crud-area" style="display: none;">
+
+        <h2>Create Document</h2>
+
+        <input type="text" id="title" placeholder="Title">
+
+        <br><br>
+
+        <textarea id="description" placeholder="Description" rows="4" cols="40"></textarea>
+
+        <br><br>
+
+        <button id="create-btn">
+            Create Document
+        </button>
+
+        <h2>Documents</h2>
+
+        <div id="documents"></div>
+
+    </div>
+
+    <script src="js/login.js"></script>
+    <script src="js/logout.js"></script>
+    <script src="js/crud.js"></script>
+
+</body>
+
+</html>
