@@ -4,56 +4,49 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CRUD Template</title>
+    <title>TaskManager Home</title>
+    <link rel="stylesheet" href="css/style.css">
 </head>
 
 <body>
 
-    <h1>CRUD Template</h1>
+    <div class="container">
 
-    <!-- Login -->
-    <div id="login-box">
+        <h1 class="app-title">TaskManager</h1>
 
-        <input type="text" id="username" placeholder="Username">
+        <!-- Login Box -->
+        <div id="login-box" class="card">
+            <input type="text" id="username" placeholder="Username">
+            <input type="password" id="password" placeholder="Password">
 
-        <input type="password" id="password" placeholder="Password">
+            <button id="login-btn" class="btn-primary">Login</button>
 
-        <button id="login-btn">Login</button>
+        </div>
 
-        <button id="logout-btn" style="display: none;">
-            Logout
-        </button>
+        <!-- Navigation Buttons (hidden until login) -->
+        <div id="nav-area" style="display: none;">
+            <button id="logout-btn" class="btn-secondary" style="display: none;">
+                Logout
+            </button>
+            
+            <a href="html/projects.html" class="nav-btn">Projects</a>
+            <a href="html/progress.html" class="nav-btn">Progress</a>
+            <a href="html/categories.html" class="nav-btn">Categories</a>
+            <a href="html/completion.html" class="nav-btn">Completion Log</a>
 
-    </div>
-
-    <hr>
-
-    <!-- CRUD area -->
-    <div id="crud-area" style="display: none;">
-
-        <h2>Create Document</h2>
-
-        <input type="text" id="title" placeholder="Title">
-
-        <br><br>
-
-        <textarea id="description" placeholder="Description" rows="4" cols="40"></textarea>
-
-        <br><br>
-
-        <button id="create-btn">
-            Create Document
-        </button>
-
-        <h2>Documents</h2>
-
-        <div id="documents"></div>
+        </div>
 
     </div>
+
+    <script>
+        if (localStorage.getItem("token")) {
+            document.getElementById("login-box").style.display = "none";
+            document.getElementById("nav-area").style.display = "block";
+        }
+    </script>
 
     <script src="js/login.js"></script>
     <script src="js/logout.js"></script>
-    <script src="js/crud.js"></script>
 
 </body>
 

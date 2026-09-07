@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+
+    <div class="container">
+
+        <h1 id="project-title">Loading...</h1>
+        <p id="project-description"></p>
+        <p id="project-score"></p>
+
+        <hr>
+
+        <!-- Tasks List -->
+        <h2>Tasks</h2>
+        <div id="tasks-list"></div>
+
+        <hr>
+
+        <!-- Add Task -->
+        <h2>Add Task</h2>
+
+        <input type="text" id="task-name" placeholder="Task name">
+        <textarea id="task-details" placeholder="Task details" rows="4"></textarea>
+
+        <button id="add-task-btn" class="btn-primary">Add Task</button>
+
+        <hr>
+
+        <!-- Project Actions -->
+        <button id="complete-project-btn" class="nav-btn">Complete Project</button>
+        <button id="delete-project-btn" class="nav-btn" style="background:#d9534f;">Delete Project</button>
+
+        <br><br>
+        <a href="projects.html" class="nav-btn">Back to Projects</a>
+
+    </div>
+
+    <script src="js/project.js"></script>
+</body>
+</html>

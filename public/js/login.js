@@ -16,9 +16,10 @@ loginBtn.addEventListener("click", async () => {
 
     if (response.ok) {
   localStorage.setItem("token", data.token);
-  document.getElementById("logout-btn").style.display = "block";
-  document.getElementById("crud-area").style.display = "block";
-  loadDocuments();
+  document.getElementById("login-box").style.display = "none";
+  document.getElementById("nav-area").style.display = "block";
+  document.getElementById("logout-btn").style.display = "inline-block";
+
   alert("Login successful!");
 
     } else {
