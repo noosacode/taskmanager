@@ -8,8 +8,8 @@ const bcrypt = require("bcrypt");
 const User = require("./backend/models/User");
 const Project = require("./backend/models/Project");
 const Task = require("./backend/models/Task");
-const CompletedProject = require("./backend/models/CompletedProject");
-const CompletedTask = require("./backend/models/CompletedTask");
+const Category = require("./backend/models/Category");
+const Container = require("./backend/models/Container");
 const auth = require("./backend/middleware/auth");
 
 const app = express();
@@ -28,6 +28,10 @@ mongoose
     console.log(error.message);
   });
 
+// --------------------------------------------------
+// AUTHENTICATION
+// --------------------------------------------------
+
 // Register
 app.post("/register", async (req, res) => {
   try {
@@ -43,8 +47,8 @@ app.post("/register", async (req, res) => {
     await user.save();
 
     res.send("User registered");
-  } catch (err) {
-    res.status(500).send(err.message);
+  } catch (error) {
+    res.status(500).send(error.message);
   }
 });
 
@@ -66,41 +70,89 @@ app.post("/login", async (req, res) => {
     }
 
     const token = jwt.sign(
-      { id: user._id, username: user.username },
+      {
+        id: user._id,
+        username: user.username,
+      },
       process.env.JWT_SECRET,
-      { expiresIn: "5h" },
+      {
+        expiresIn: "5h",
+      },
     );
 
     res.json({ token });
-  } catch (err) {
-    res.status(500).send(err.message);
+  } catch (error) {
+    res.status(500).send(error.message);
   }
 });
 
-// Home page
+// --------------------------------------------------
+// HOME PAGE
+// --------------------------------------------------
+
 app.get("/", function (req, res) {
   res.sendFile(__dirname + "/public/index.html");
 });
 
-// -------------------------
-// CRUD PROJECT ROUTES
-// -------------------------
+// --------------------------------------------------
+// PROJECT ROUTES
+// --------------------------------------------------
 
-// Get all projects
+// Get active projects
+// Sorted by project priority, highest first.
 app.get("/api/projects", auth, async (req, res) => {
   try {
-    const projects = await Project.find().sort({ projectScore: -1 });
+    const projects = await Project.find({
+      status: "active",
+    })
+      .populate("container")
+      .sort({ projectPriorityScore: -1, title: 1 });
 
     res.json(projects);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({
+      error: error.message,
+    });
+  }
+});
+
+// Get inactive projects
+app.get("/api/projects/inactive", auth, async (req, res) => {
+  try {
+    const projects = await Project.find({
+      status: "inactive",
+    })
+      .populate("container")
+      .sort({ title: 1 });
+
+    res.json(projects);
+  } catch (error) {
+    res.status(500).json({
+      error: error.message,
+    });
+  }
+});
+
+// Get completed projects
+// Most recently completed first.
+app.get("/api/projects/completed", auth, async (req, res) => {
+  try {
+    const projects = await Project.find({
+      status: "completed",
+    }).sort({ completedAt: -1 });
+
+    res.json(projects);
+  } catch (error) {
+    res.status(500).json({
+      error: error.message,
+    });
   }
 });
 
 // Get one project
 app.get("/api/projects/:id", auth, async (req, res) => {
   try {
-    const project = await Project.findById(req.params.id).populate("tasks");
+    const project = await Project.findById(req.params.id).populate("container");
 
     if (!project) {
       return res.status(404).json({
@@ -110,30 +162,56 @@ app.get("/api/projects/:id", auth, async (req, res) => {
 
     res.json(project);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({
+      error: error.message,
+    });
   }
 });
 
 // Create project
 app.post("/api/projects", auth, async (req, res) => {
   try {
-    const project = new Project(req.body);
+    const project = new Project({
+      title: req.body.title,
+      description: req.body.description,
+      projectPriorityScore: req.body.projectPriorityScore,
+      container: req.body.container || null,
+    });
 
     await project.save();
 
     res.status(201).json(project);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({
+      error: error.message,
+    });
   }
 });
 
-// Update project
+// Update general project information
+//
+// Notice that projectPriorityScore is deliberately NOT updated here.
+// Project priority is a comparative value and has its own route.
 app.put("/api/projects/:id", auth, async (req, res) => {
   try {
-    const project = await Project.findByIdAndUpdate(req.params.id, req.body, {
+    const updates = {};
+
+    if (req.body.title !== undefined) {
+      updates.title = req.body.title;
+    }
+
+    if (req.body.description !== undefined) {
+      updates.description = req.body.description;
+    }
+
+    if (req.body.container !== undefined) {
+      updates.container = req.body.container || null;
+    }
+
+    const project = await Project.findByIdAndUpdate(req.params.id, updates, {
       new: true,
       runValidators: true,
-    });
+    }).populate("container");
 
     if (!project) {
       return res.status(404).json({
@@ -143,11 +221,134 @@ app.put("/api/projects/:id", auth, async (req, res) => {
 
     res.json(project);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({
+      error: error.message,
+    });
+  }
+});
+
+// Change project priority
+//
+// This is intentionally a separate route because project priority
+// is only changed from the Projects page.
+app.put("/api/projects/:id/priority", auth, async (req, res) => {
+  try {
+    const project = await Project.findByIdAndUpdate(
+      req.params.id,
+      {
+        projectPriorityScore: req.body.projectPriorityScore,
+      },
+      {
+        new: true,
+        runValidators: true,
+      },
+    );
+
+    if (!project) {
+      return res.status(404).json({
+        message: "Project not found.",
+      });
+    }
+
+    res.json(project);
+  } catch (error) {
+    res.status(500).json({
+      error: error.message,
+    });
+  }
+});
+
+// Make project inactive
+app.post("/api/projects/:id/inactivate", auth, async (req, res) => {
+  try {
+    const project = await Project.findByIdAndUpdate(
+      req.params.id,
+      {
+        status: "inactive",
+      },
+      {
+        new: true,
+        runValidators: true,
+      },
+    );
+
+    if (!project) {
+      return res.status(404).json({
+        message: "Project not found.",
+      });
+    }
+
+    res.json(project);
+  } catch (error) {
+    res.status(500).json({
+      error: error.message,
+    });
+  }
+});
+
+// Make project active
+app.post("/api/projects/:id/activate", auth, async (req, res) => {
+  try {
+    const project = await Project.findByIdAndUpdate(
+      req.params.id,
+      {
+        status: "active",
+        completedAt: null,
+      },
+      {
+        new: true,
+        runValidators: true,
+      },
+    );
+
+    if (!project) {
+      return res.status(404).json({
+        message: "Project not found.",
+      });
+    }
+
+    res.json(project);
+  } catch (error) {
+    res.status(500).json({
+      error: error.message,
+    });
+  }
+});
+
+// Mark project completed
+//
+// The project stays in the projects collection.
+app.post("/api/projects/:id/complete", auth, async (req, res) => {
+  try {
+    const project = await Project.findByIdAndUpdate(
+      req.params.id,
+      {
+        status: "completed",
+        completedAt: new Date(),
+      },
+      {
+        new: true,
+        runValidators: true,
+      },
+    );
+
+    if (!project) {
+      return res.status(404).json({
+        message: "Project not found.",
+      });
+    }
+
+    res.json(project);
+  } catch (error) {
+    res.status(500).json({
+      error: error.message,
+    });
   }
 });
 
 // Delete project
+//
+// Deleting a project also deletes its tasks.
 app.delete("/api/projects/:id", auth, async (req, res) => {
   try {
     const project = await Project.findByIdAndDelete(req.params.id);
@@ -158,85 +359,219 @@ app.delete("/api/projects/:id", auth, async (req, res) => {
       });
     }
 
-    // Delete all tasks belonging to this project
-    await Task.deleteMany({ projectId: req.params.id });
+    await Task.deleteMany({
+      projectId: req.params.id,
+    });
 
     res.json({
       message: "Project deleted.",
     });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({
+      error: error.message,
+    });
   }
 });
 
-// -------------------------
+// --------------------------------------------------
 // TASK ROUTES
-// -------------------------
+// --------------------------------------------------
 
-// Create task (belongs to a project)
+// Get all tasks for a project
+//
+// Completed tasks are included here because completed tasks
+// remain attached to their project.
+app.get("/api/projects/:projectId/tasks", auth, async (req, res) => {
+  try {
+    const tasks = await Task.find({
+      projectId: req.params.projectId,
+    }).sort({
+      completed: 1,
+      priorityScore: -1,
+      name: 1,
+    });
+
+    res.json(tasks);
+  } catch (error) {
+    res.status(500).json({
+      error: error.message,
+    });
+  }
+});
+
+// Create task inside a project
 app.post("/api/projects/:projectId/tasks", auth, async (req, res) => {
   try {
+    const project = await Project.findById(req.params.projectId);
+
+    if (!project) {
+      return res.status(404).json({
+        message: "Project not found.",
+      });
+    }
+
     const task = new Task({
-      ...req.body,
       projectId: req.params.projectId,
+      name: req.body.name,
+      details: req.body.details,
+      priorityScore: req.body.priorityScore,
+      category: req.body.category || null,
     });
 
     await task.save();
 
-    // Add task to project.tasks array
-    await Project.findByIdAndUpdate(req.params.projectId, {
-      $push: { tasks: task._id },
-    });
-
     res.status(201).json(task);
   } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
-
-// Get all tasks for a project
-app.get("/api/projects/:projectId/tasks", auth, async (req, res) => {
-  try {
-    const tasks = await Task.find({ projectId: req.params.projectId })
-      .sort({ sequenceScore: -1 });
-
-    res.json(tasks);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({
+      error: error.message,
+    });
   }
 });
 
 // Get one task
 app.get("/api/tasks/:id", auth, async (req, res) => {
   try {
-    const task = await Task.findById(req.params.id);
+    const task = await Task.findById(req.params.id).populate("category");
 
     if (!task) {
-      return res.status(404).json({ message: "Task not found." });
+      return res.status(404).json({
+        message: "Task not found.",
+      });
     }
 
     res.json(task);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({
+      error: error.message,
+    });
   }
 });
 
 // Update task
 app.put("/api/tasks/:id", auth, async (req, res) => {
   try {
-    const task = await Task.findByIdAndUpdate(
-      req.params.id,
-      req.body,
-      { new: true, runValidators: true }
-    );
+    const updates = {};
+
+    if (req.body.name !== undefined) {
+      updates.name = req.body.name;
+    }
+
+    if (req.body.details !== undefined) {
+      updates.details = req.body.details;
+    }
+
+    if (req.body.priorityScore !== undefined) {
+      updates.priorityScore = req.body.priorityScore;
+    }
+
+    if (req.body.category !== undefined) {
+      updates.category = req.body.category || null;
+    }
+
+    if (req.body.completed !== undefined) {
+      updates.completed = req.body.completed;
+
+      if (req.body.completed === true) {
+        updates.completedAt = new Date();
+      } else {
+        updates.completedAt = null;
+      }
+    }
+
+    const task = await Task.findByIdAndUpdate(req.params.id, updates, {
+      new: true,
+      runValidators: true,
+    }).populate("category");
 
     if (!task) {
-      return res.status(404).json({ message: "Task not found." });
+      return res.status(404).json({
+        message: "Task not found.",
+      });
     }
 
     res.json(task);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({
+      error: error.message,
+    });
+  }
+});
+
+// Mark task completed
+//
+// The task stays in the tasks collection.
+app.post("/api/tasks/:id/complete", auth, async (req, res) => {
+  try {
+    const task = await Task.findByIdAndUpdate(
+      req.params.id,
+      {
+        completed: true,
+        completedAt: new Date(),
+      },
+      {
+        new: true,
+        runValidators: true,
+      },
+    );
+
+    if (!task) {
+      return res.status(404).json({
+        message: "Task not found.",
+      });
+    }
+
+    res.json(task);
+  } catch (error) {
+    res.status(500).json({
+      error: error.message,
+    });
+  }
+});
+
+// Reopen a completed task
+app.post("/api/tasks/:id/reopen", auth, async (req, res) => {
+  try {
+    const task = await Task.findByIdAndUpdate(
+      req.params.id,
+      {
+        completed: false,
+        completedAt: null,
+      },
+      {
+        new: true,
+        runValidators: true,
+      },
+    );
+
+    if (!task) {
+      return res.status(404).json({
+        message: "Task not found.",
+      });
+    }
+
+    res.json(task);
+  } catch (error) {
+    res.status(500).json({
+      error: error.message,
+    });
+  }
+});
+
+// Get completed tasks
+// Most recently completed first.
+app.get("/api/tasks/completed", auth, async (req, res) => {
+  try {
+    const tasks = await Task.find({
+      completed: true,
+    })
+      .populate("projectId", "title")
+      .sort({ completedAt: -1 });
+
+    res.json(tasks);
+  } catch (error) {
+    res.status(500).json({
+      error: error.message,
+    });
   }
 });
 
@@ -246,282 +581,325 @@ app.delete("/api/tasks/:id", auth, async (req, res) => {
     const task = await Task.findByIdAndDelete(req.params.id);
 
     if (!task) {
-      return res.status(404).json({ message: "Task not found." });
+      return res.status(404).json({
+        message: "Task not found.",
+      });
     }
 
-    // Remove task from its project.tasks array
-    await Project.findByIdAndUpdate(task.projectId, {
-      $pull: { tasks: task._id },
+    res.json({
+      message: "Task deleted.",
     });
-
-    res.json({ message: "Task deleted." });
   } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
-
-// -------------------------
-// CATEGORY ROUTES
-// -------------------------
-
-// Get all categories (unique list)
-app.get("/api/categories", auth, async (req, res) => {
-  try {
-    const tasks = await Task.find({}, "categories");
-    const categorySet = new Set();
-
-    tasks.forEach(t => {
-      t.categories.forEach(c => categorySet.add(c));
+    res.status(500).json({
+      error: error.message,
     });
-
-    res.json([...categorySet]);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
   }
 });
 
-// Create a new category (adds to all tasks? No — categories exist only when used)
-app.post("/api/categories", auth, async (req, res) => {
+// --------------------------------------------------
+// PRIORITY TASK ROUTES
+// --------------------------------------------------
+
+// Get all current Priority Tasks.
+//
+// 50–99 = Priority Task
+// Completed tasks are excluded.
+app.get("/api/priority-tasks", auth, async (req, res) => {
   try {
-    const { name } = req.body;
-
-    if (!name || name.trim() === "") {
-      return res.status(400).json({ message: "Category name required." });
-    }
-
-    res.status(201).json({ message: "Category created.", name });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
-
-// Rename a category
-app.put("/api/categories/:oldName", auth, async (req, res) => {
-  try {
-    const { newName } = req.body;
-
-    if (!newName || newName.trim() === "") {
-      return res.status(400).json({ message: "New category name required." });
-    }
-
-    await Task.updateMany(
-      { categories: req.params.oldName },
-      { $set: { "categories.$": newName } }
-    );
-
-    res.json({ message: "Category renamed." });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
-
-// Delete a category (remove from all tasks)
-app.delete("/api/categories/:name", auth, async (req, res) => {
-  try {
-    await Task.updateMany(
-      { categories: req.params.name },
-      { $pull: { categories: req.params.name } }
-    );
-
-    res.json({ message: "Category deleted." });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
-
-// Get tasks in a category (sorted by focusScore)
-app.get("/api/categories/:name/tasks", auth, async (req, res) => {
-  try {
-    const tasks = await Task.find({ categories: req.params.name })
-      .sort({ focusScore: -1 });
+    const tasks = await Task.find({
+      priorityScore: {
+        $gte: 50,
+        $lte: 99,
+      },
+      completed: false,
+    })
+      .populate("projectId", "title")
+      .populate("category", "name")
+      .sort({ priorityScore: -1, name: 1 });
 
     res.json(tasks);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({
+      error: error.message,
+    });
   }
 });
 
-// -------------------------
-// PROGRESS PAGE ROUTES
-// -------------------------
-
-// Get progress summary
-app.get("/api/progress", auth, async (req, res) => {
+// Get Priority Tasks that have no category.
+//
+// Useful for the Priority Tasks checkpoint.
+app.get("/api/priority-tasks/uncategorised", auth, async (req, res) => {
   try {
-    // Count totals
-    const tasksAdded = await Task.countDocuments();
-    const tasksCompleted = await CompletedTask.countDocuments();
-    const projectsCompleted = await CompletedProject.countDocuments();
-
-    // Streak: days with at least one completed task
-    const streakData = await CompletedTask.aggregate([
-      {
-        $group: {
-          _id: {
-            year: { $year: "$completedAt" },
-            month: { $month: "$completedAt" },
-            day: { $dayOfMonth: "$completedAt" }
-          },
-          count: { $sum: 1 }
-        }
-      }
-    ]);
-
-    const streak = streakData.length;
-
-    // Project activity ranking (last 10 days)
-    const tenDaysAgo = new Date();
-    tenDaysAgo.setDate(tenDaysAgo.getDate() - 10);
-
-    const activity = await CompletedTask.aggregate([
-      { $match: { completedAt: { $gte: tenDaysAgo } } },
-      {
-        $group: {
-          _id: "$projectId",
-          completedTasks: { $sum: 1 }
-        }
+    const tasks = await Task.find({
+      priorityScore: {
+        $gte: 50,
+        $lte: 99,
       },
-      { $sort: { completedTasks: -1 } }
-    ]);
+      completed: false,
+      category: null,
+    })
+      .populate("projectId", "title")
+      .sort({ priorityScore: -1, name: 1 });
 
-    res.json({
-      tasksAdded,
-      tasksCompleted,
-      projectsCompleted,
-      streak,
-      activity
-    });
+    res.json(tasks);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({
+      error: error.message,
+    });
   }
 });
 
-// -------------------------
-// COMPLETION LOG ROUTES
-// -------------------------
+// --------------------------------------------------
+// CATEGORY ROUTES
+// --------------------------------------------------
 
-// Get completion log (tasks + projects)
-app.get("/api/completion-log", auth, async (req, res) => {
+// Get all categories
+app.get("/api/categories", auth, async (req, res) => {
   try {
-    // Completed tasks
-    const completedTasks = await CompletedTask.find()
-      .sort({ completedAt: -1 });
-
-    // Completed projects
-    const completedProjects = await CompletedProject.find()
-      .sort({ completedAt: -1 });
-
-    res.json({
-      completedTasks,
-      completedProjects
+    const categories = await Category.find().sort({
+      name: 1,
     });
+
+    res.json(categories);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({
+      error: error.message,
+    });
   }
 });
 
-// -------------------------
-// TASK COMPLETION ROUTES
-// -------------------------
-
-// Complete a task
-app.post("/api/tasks/:id/complete", auth, async (req, res) => {
+// Create category
+app.post("/api/categories", auth, async (req, res) => {
   try {
-    // 1. Find the active task
-    const task = await Task.findById(req.params.id);
+    const name = req.body.name?.trim();
 
-    if (!task) {
-      return res.status(404).json({ message: "Task not found." });
+    if (!name) {
+      return res.status(400).json({
+        message: "Category name required.",
+      });
     }
 
-    // 2. Create CompletedTask entry
-    const completedTask = new CompletedTask({
-      originalTaskId: task._id,
-      projectId: task.projectId,
-      name: task.name,
-      details: task.details,
-      sequenceScoreAtCompletion: task.sequenceScore,
-      focusScoreAtCompletion: task.focusScore,
-      categories: task.categories,
-      completedAt: Date.now(),
+    const category = new Category({
+      name,
     });
 
-    await completedTask.save();
+    await category.save();
 
-    // 3. Remove task from active tasks
-    await Task.findByIdAndDelete(task._id);
-
-    // 4. Remove task from its project.tasks array
-    await Project.findByIdAndUpdate(task.projectId, {
-      $pull: { tasks: task._id },
-    });
-
-    res.json({
-      message: "Task completed.",
-      completedTask,
-    });
+    res.status(201).json(category);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    if (error.code === 11000) {
+      return res.status(400).json({
+        message: "Category already exists.",
+      });
+    }
+
+    res.status(500).json({
+      error: error.message,
+    });
   }
 });
 
-// -------------------------
-// PROJECT COMPLETION ROUTES
-// -------------------------
-
-// Complete a project
-app.post("/api/projects/:id/complete", auth, async (req, res) => {
+// Delete category
+//
+// Tasks using this category are not deleted.
+// Their category is simply cleared.
+app.delete("/api/categories/:id", auth, async (req, res) => {
   try {
-    // 1. Find the active project
-    const project = await Project.findById(req.params.id).populate("tasks");
+    const category = await Category.findByIdAndDelete(req.params.id);
 
-    if (!project) {
-      return res.status(404).json({ message: "Project not found." });
+    if (!category) {
+      return res.status(404).json({
+        message: "Category not found.",
+      });
     }
 
-    // 2. Create CompletedProject entry
-    const completedProject = new CompletedProject({
-      originalProjectId: project._id,
-      title: project.title,
-      description: project.description,
-      projectScoreAtCompletion: project.projectScore,
-      completedAt: Date.now(),
+    await Task.updateMany(
+      {
+        category: req.params.id,
+      },
+      {
+        $set: {
+          category: null,
+        },
+      },
+    );
+
+    res.json({
+      message: "Category deleted.",
     });
+  } catch (error) {
+    res.status(500).json({
+      error: error.message,
+    });
+  }
+});
 
-    await completedProject.save();
+// Get tasks in a category
+//
+// This is where tasks from different projects can be compared.
+app.get("/api/categories/:id/tasks", auth, async (req, res) => {
+  try {
+    const category = await Category.findById(req.params.id);
 
-    // 3. Move all tasks to CompletedTask
-    for (const task of project.tasks) {
-      const completedTask = new CompletedTask({
-        originalTaskId: task._id,
-        projectId: project._id,
-        name: task.name,
-        details: task.details,
-        sequenceScoreAtCompletion: task.sequenceScore,
-        focusScoreAtCompletion: task.focusScore,
-        categories: task.categories,
-        completedAt: Date.now(),
+    if (!category) {
+      return res.status(404).json({
+        message: "Category not found.",
+      });
+    }
+
+    const tasks = await Task.find({
+      category: req.params.id,
+      completed: false,
+      priorityScore: {
+        $gte: 50,
+        $lte: 99,
+      },
+    })
+      .populate("projectId", "title")
+      .sort({
+        priorityScore: -1,
+        name: 1,
       });
 
-      await completedTask.save();
-
-      // Delete active task
-      await Task.findByIdAndDelete(task._id);
-    }
-
-    // 4. Delete the active project
-    await Project.findByIdAndDelete(project._id);
-
-    res.json({
-      message: "Project completed.",
-      completedProject,
-    });
+    res.json(tasks);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({
+      error: error.message,
+    });
   }
 });
 
-// Start server locally
+// --------------------------------------------------
+// CONTAINER ROUTES
+// --------------------------------------------------
+
+// Get all containers
+app.get("/api/containers", auth, async (req, res) => {
+  try {
+    const containers = await Container.find().sort({
+      name: 1,
+    });
+
+    res.json(containers);
+  } catch (error) {
+    res.status(500).json({
+      error: error.message,
+    });
+  }
+});
+
+// Create container
+app.post("/api/containers", auth, async (req, res) => {
+  try {
+    const name = req.body.name?.trim();
+
+    if (!name) {
+      return res.status(400).json({
+        message: "Container name required.",
+      });
+    }
+
+    const container = new Container({
+      name,
+    });
+
+    await container.save();
+
+    res.status(201).json(container);
+  } catch (error) {
+    if (error.code === 11000) {
+      return res.status(400).json({
+        message: "Container already exists.",
+      });
+    }
+
+    res.status(500).json({
+      error: error.message,
+    });
+  }
+});
+
+// Rename container
+app.put("/api/containers/:id", auth, async (req, res) => {
+  try {
+    const name = req.body.name?.trim();
+
+    if (!name) {
+      return res.status(400).json({
+        message: "Container name required.",
+      });
+    }
+
+    const container = await Container.findByIdAndUpdate(
+      req.params.id,
+      {
+        name,
+      },
+      {
+        new: true,
+        runValidators: true,
+      },
+    );
+
+    if (!container) {
+      return res.status(404).json({
+        message: "Container not found.",
+      });
+    }
+
+    res.json(container);
+  } catch (error) {
+    if (error.code === 11000) {
+      return res.status(400).json({
+        message: "Container already exists.",
+      });
+    }
+
+    res.status(500).json({
+      error: error.message,
+    });
+  }
+});
+
+// Delete container
+//
+// Projects using this container are not deleted.
+// Their container is simply cleared.
+app.delete("/api/containers/:id", auth, async (req, res) => {
+  try {
+    const container = await Container.findByIdAndDelete(req.params.id);
+
+    if (!container) {
+      return res.status(404).json({
+        message: "Container not found.",
+      });
+    }
+
+    await Project.updateMany(
+      {
+        container: req.params.id,
+      },
+      {
+        $set: {
+          container: null,
+        },
+      },
+    );
+
+    res.json({
+      message: "Container deleted.",
+    });
+  } catch (error) {
+    res.status(500).json({
+      error: error.message,
+    });
+  }
+});
+
+// --------------------------------------------------
+// START SERVER
+// --------------------------------------------------
+
 if (require.main === module) {
   app.listen(3000, function () {
     console.log("Server running on http://localhost:3000");

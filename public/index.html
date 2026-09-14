@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TaskManager Home</title>
+    <title>Task Manager</title>
     <link rel="stylesheet" href="css/style.css">
 </head>
 
@@ -12,27 +12,28 @@
 
     <div class="container">
 
-        <h1 class="app-title">TaskManager</h1>
+        <h1>Task Manager</h1>
 
-        <!-- Login Box -->
+        <!-- Login -->
         <div id="login-box" class="card">
             <input type="text" id="username" placeholder="Username">
             <input type="password" id="password" placeholder="Password">
 
             <button id="login-btn" class="btn-primary">Login</button>
-
         </div>
 
-        <!-- Navigation Buttons (hidden until login) -->
+        <!-- Main navigation -->
         <div id="nav-area" style="display: none;">
-            <button id="logout-btn" class="btn-secondary" style="display: none;">
+
+            <a href="html/projects.html" class="nav-btn">Projects</a>
+            <a href="html/priority-tasks.html" class="nav-btn">Priority Tasks</a>
+            <a href="html/categories.html" class="nav-btn">Categories</a>
+            <a href="html/containers.html" class="nav-btn">Containers</a>
+            <a href="html/completed.html" class="nav-btn">Completed</a>
+
+            <button id="logout-btn" class="btn-secondary">
                 Logout
             </button>
-            
-            <a href="html/projects.html" class="nav-btn">Projects</a>
-            <a href="html/progress.html" class="nav-btn">Progress</a>
-            <a href="html/categories.html" class="nav-btn">Categories</a>
-            <a href="html/completion.html" class="nav-btn">Completion Log</a>
 
         </div>
 

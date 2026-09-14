@@ -20,31 +20,33 @@ const TaskSchema = new mongoose.Schema(
       trim: true,
     },
 
-    sequenceScore: {
+    priorityScore: {
       type: Number,
-      default: 0, // 0–99
+      default: 0,
       min: 0,
       max: 99,
     },
 
-    focusScore: {
-      type: Number,
-      default: 0, // 0–99 (category-based sorting)
-      min: 0,
-      max: 99,
+    category: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Category",
+      default: null,
     },
 
-    categories: {
-      type: [String], // multi-select categories
-      default: [],
+    completed: {
+      type: Boolean,
+      default: false,
     },
 
-    createdAt: {
+    completedAt: {
       type: Date,
-      default: Date.now,
+      default: null,
     },
   },
-  { collection: "tasks" },
+  {
+    timestamps: true,
+    collection: "tasks",
+  },
 );
 
 module.exports = mongoose.model("Task", TaskSchema);

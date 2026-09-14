@@ -14,27 +14,34 @@ const ProjectSchema = new mongoose.Schema(
       trim: true,
     },
 
-    projectScore: {
+    projectPriorityScore: {
       type: Number,
-      default: 0, // 0–99
+      default: 0,
       min: 0,
       max: 99,
     },
 
-    // Array of Task ObjectIds
-    tasks: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Task",
-      },
-    ],
+    status: {
+      type: String,
+      enum: ["active", "inactive", "completed"],
+      default: "active",
+    },
 
-    createdAt: {
+    container: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Container",
+      default: null,
+    },
+
+    completedAt: {
       type: Date,
-      default: Date.now,
+      default: null,
     },
   },
-  { collection: "projects" },
+  {
+    timestamps: true,
+    collection: "projects",
+  },
 );
 
 module.exports = mongoose.model("Project", ProjectSchema);
