@@ -24,7 +24,8 @@ async function loadProject() {
   try {
     const response = await fetch(`/api/projects/${projectId}`, {
       headers: {
-        Authorization: `Bearer ${localStorage.getItem("token")}`,
+        Authorization: localStorage.getItem("token"),
+        //    Authorization: `Bearer ${localStorage.getItem("token")}`,
       },
     });
 
@@ -97,7 +98,8 @@ addTaskBtn.addEventListener("click", async () => {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${localStorage.getItem("token")}`,
+        Authorization: localStorage.getItem("token"),
+        //    Authorization: `Bearer ${localStorage.getItem("token")}`,
       },
       body: JSON.stringify({ name, details }),
     });
@@ -124,7 +126,8 @@ async function completeTask(taskId) {
     const response = await fetch(`/api/tasks/${taskId}/complete`, {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${localStorage.getItem("token")}`,
+        Authorization: localStorage.getItem("token"),
+        //    Authorization: `Bearer ${localStorage.getItem("token")}`,
       },
     });
 
@@ -148,7 +151,8 @@ async function deleteTask(taskId) {
     const response = await fetch(`/api/tasks/${taskId}`, {
       method: "DELETE",
       headers: {
-        Authorization: `Bearer ${localStorage.getItem("token")}`,
+        Authorization: localStorage.getItem("token"),
+        //    Authorization: `Bearer ${localStorage.getItem("token")}`,
       },
     });
 
@@ -174,7 +178,8 @@ completeProjectBtn.addEventListener("click", async () => {
     const response = await fetch(`/api/projects/${projectId}/complete`, {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${localStorage.getItem("token")}`,
+        Authorization: localStorage.getItem("token"),
+        //    Authorization: `Bearer ${localStorage.getItem("token")}`,
       },
     });
 
@@ -201,7 +206,8 @@ deleteProjectBtn.addEventListener("click", async () => {
     const response = await fetch(`/api/projects/${projectId}`, {
       method: "DELETE",
       headers: {
-        Authorization: `Bearer ${localStorage.getItem("token")}`,
+        Authorization: localStorage.getItem("token"),
+        //    Authorization: `Bearer ${localStorage.getItem("token")}`,
       },
     });
 
