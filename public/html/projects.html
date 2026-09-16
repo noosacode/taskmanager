@@ -1,37 +1,55 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Projects</title>
-    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 
 <body>
 
     <div class="container">
 
+        <header>
+            <nav class="top-nav">
+                <a href="/index.html">Home</a>
+                <a href="/html/projects.html">Projects</a>
+                <a href="/html/priority-tasks.html">Priority Tasks</a>
+                <a href="/html/categories.html">Categories</a>
+                <a href="/html/containers.html">Containers</a>
+            </nav>
+        </header>
+
         <h1>Projects</h1>
 
-        <!-- Create Project -->
-        <h2>Create Project</h2>
+        <button id="add-project-btn">
+            Add Project
+        </button>
 
-        <input type="text" id="project-title-input" placeholder="Project title">
-        <textarea id="project-description-input" placeholder="Project description" rows="4"></textarea>
+        <button id="project-scores-btn">
+            Edit Scores
+        </button>
 
-        <button id="create-project-btn" class="btn-primary">Create Project</button>
+        <button id="inactive-projects-btn">
+            Inactive Projects
+        </button>
 
-        <hr>
+        <button id="completed-projects-btn">
+            Completed Projects
+        </button>
 
-        <!-- Projects List -->
-        <h2>Your Projects</h2>
-        <div id="projects-list"></div>
+        <br><br>
 
-        <br>
-        <a href="../index.html" class="nav-btn">Back Home</a>
+        <div id="projects-list">
+            Loading...
+        </div>
 
     </div>
 
-    <script src="../js/projects.js"></script>
+    <script src="/js/projects.js"></script>
+
 </body>
+
 </html>

@@ -1,12 +1,16 @@
 // -------------------------
-// PROJECTS PAGE LOGIC
+// PROJECTS PAGE
 // -------------------------
 
 const projectsList = document.getElementById("projects-list");
-const createProjectBtn = document.getElementById("create-project-btn");
+
+const addProjectBtn = document.getElementById("add-project-btn");
+const editProjectsBtn = document.getElementById("project-scores-btn");
+const inactiveProjectsBtn = document.getElementById("inactive-projects-btn");
+const completedProjectsBtn = document.getElementById("completed-projects-btn");
 
 // -------------------------
-// LOAD ALL PROJECTS
+// LOAD PROJECTS
 // -------------------------
 
 async function loadProjects() {
@@ -14,21 +18,19 @@ async function loadProjects() {
     const response = await fetch("/api/projects", {
       headers: {
         Authorization: localStorage.getItem("token"),
-        //    Authorization: `Bearer ${localStorage.getItem("token")}`,
       },
     });
 
-    const projects = await response.json();
-    if (projects.length === 0) {
-      projectsList.innerHTML = "<p>No projects yet. Create one above!</p>";
-      return;
+    if (!response.ok) {
+      throw new Error("Could not load projects");
     }
 
-    renderProjects(projects);
+    const projects = await response.json();
 
+    renderProjects(projects);
   } catch (err) {
     console.error(err);
-    alert("Error loading projects");
+    projectsList.textContent = "Error loading projects";
   }
 }
 
@@ -39,97 +41,66 @@ async function loadProjects() {
 function renderProjects(projects) {
   projectsList.innerHTML = "";
 
+  if (projects.length === 0) {
+    projectsList.textContent = "No active projects.";
+    return;
+  }
+
   projects.forEach((project) => {
-    const div = document.createElement("div");
-    div.className = "card";
-    div.style.marginBottom = "15px";
+    const row = document.createElement("div");
 
-    div.innerHTML = `
-            <h3>${project.title}</h3>
-            <p>${project.description}</p>
-            <p>Score: ${project.projectScore}</p>
+    row.className = "item-row";
 
-            <a href="project.html?id=${project._id}" class="btn-primary" style="display:block;margin-top:10px;">
-                Open Project
-            </a>
+    const projectLink = document.createElement("a");
+    projectLink.href = `/html/project.html?id=${project._id}`;
+    projectLink.textContent = project.title;
+    projectLink.className = "item-name";
 
-            <button class="btn-secondary" style="margin-top:10px;" onclick="deleteProject('${project._id}')">
-                Delete Project
-            </button>
-        `;
+    const score = document.createElement("span");
+    score.textContent = project.projectPriorityScore;
+    score.className = "item-score";
 
-    projectsList.appendChild(div);
+    row.appendChild(projectLink);
+    row.appendChild(score);
+
+    projectsList.appendChild(row);
   });
 }
 
 // -------------------------
-// CREATE PROJECT
+// ADD PROJECT
 // -------------------------
 
-createProjectBtn.addEventListener("click", async () => {
-  const title = document.getElementById("project-title-input").value;
-  const description = document.getElementById(
-    "project-description-input",
-  ).value;
-
-  if (!title.trim()) {
-    alert("Project title required");
-    return;
-  }
-
-  try {
-    const response = await fetch("/api/projects", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: localStorage.getItem("token"),
-        //    Authorization: `Bearer ${localStorage.getItem("token")}`,
-      },
-      body: JSON.stringify({ title, description }),
-    });
-
-    if (response.ok) {
-      document.getElementById("project-title-input").value = "";
-      document.getElementById("project-description-input").value = "";
-      loadProjects();
-    } else {
-      alert("Error creating project");
-    }
-  } catch (err) {
-    console.error(err);
-    alert("Server error");
-  }
+addProjectBtn.addEventListener("click", () => {
+  window.location.href = "/html/create-project.html";
 });
 
 // -------------------------
-// DELETE PROJECT
+// EDIT PROJECTS
 // -------------------------
 
-async function deleteProject(projectId) {
-  if (!confirm("Delete this project?")) return;
-
-  try {
-    const response = await fetch(`/api/projects/${projectId}`, {
-      method: "DELETE",
-      headers: {
-        Authorization: localStorage.getItem("token"),
-        //    Authorization: `Bearer ${localStorage.getItem("token")}`,
-      },
-    });
-
-    if (response.ok) {
-      loadProjects();
-    } else {
-      alert("Error deleting project");
-    }
-  } catch (err) {
-    console.error(err);
-    alert("Server error");
-  }
-}
+editProjectsBtn.addEventListener("click", () => {
+  window.location.href = "/html/project-scores.html";
+});
 
 // -------------------------
-// INIT
+// INACTIVE PROJECTS
+// -------------------------
+
+inactiveProjectsBtn.addEventListener("click", () => {
+  window.location.href = "/html/inactive-projects.html";
+});
+
+// -------------------------
+// COMPLETED PROJECTS
+// -------------------------
+
+completedProjectsBtn.addEventListener("click", () => {
+  window.location.href = "/html/completed-projects.html";
+});
+
+// -------------------------
+// START
 // -------------------------
 
 loadProjects();

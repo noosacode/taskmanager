@@ -1,20 +1,22 @@
 // -------------------------
-// PROJECT PAGE LOGIC
+// PROJECT PAGE
 // -------------------------
 
-// Get project ID from URL
 const urlParams = new URLSearchParams(window.location.search);
 const projectId = urlParams.get("id");
 
-// Elements
+// -------------------------
+// ELEMENTS
+// -------------------------
+
 const projectTitle = document.getElementById("project-title");
-const projectDescription = document.getElementById("project-description");
-const projectScore = document.getElementById("project-score");
 const tasksList = document.getElementById("tasks-list");
 
-const addTaskBtn = document.getElementById("add-task-btn");
+const addTaskBtn = document.getElementById("create-task-btn");
+const editTasksBtn = document.getElementById("task-scores-btn");
+const projectDetailsBtn = document.getElementById("project-details-btn");
+const completedTasksBtn = document.getElementById("completed-tasks-btn");
 const completeProjectBtn = document.getElementById("complete-project-btn");
-const deleteProjectBtn = document.getElementById("delete-project-btn");
 
 // -------------------------
 // LOAD PROJECT
@@ -25,17 +27,45 @@ async function loadProject() {
     const response = await fetch(`/api/projects/${projectId}`, {
       headers: {
         Authorization: localStorage.getItem("token"),
-        //    Authorization: `Bearer ${localStorage.getItem("token")}`,
       },
     });
+
+    if (!response.ok) {
+      throw new Error("Could not load project");
+    }
 
     const project = await response.json();
 
     renderProject(project);
-    renderTasks(project.tasks);
+    await loadTasks();
   } catch (err) {
     console.error(err);
-    alert("Error loading project");
+    projectTitle.textContent = "Error loading project";
+  }
+}
+
+// -------------------------
+// LOAD TASKS
+// -------------------------
+
+async function loadTasks() {
+  try {
+    const response = await fetch(`/api/projects/${projectId}/tasks`, {
+      headers: {
+        Authorization: localStorage.getItem("token"),
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error("Could not load tasks");
+    }
+
+    const tasks = await response.json();
+
+    renderTasks(tasks);
+  } catch (err) {
+    console.error(err);
+    tasksList.textContent = "Error loading tasks";
   }
 }
 
@@ -45,8 +75,6 @@ async function loadProject() {
 
 function renderProject(project) {
   projectTitle.textContent = project.title;
-  projectDescription.textContent = project.description;
-  projectScore.textContent = `Project Score: ${project.projectScore}`;
 }
 
 // -------------------------
@@ -56,27 +84,29 @@ function renderProject(project) {
 function renderTasks(tasks) {
   tasksList.innerHTML = "";
 
+  if (tasks.length === 0) {
+    tasksList.textContent = "No tasks added yet.";
+    return;
+  }
+
   tasks.forEach((task) => {
-    const div = document.createElement("div");
-    div.className = "card";
-    div.style.marginBottom = "15px";
+    const row = document.createElement("div");
 
-    div.innerHTML = `
-            <h3>${task.name}</h3>
-            <p>${task.details}</p>
-            <p>Sequence Score: ${task.sequenceScore}</p>
-            <p>Focus Score: ${task.focusScore}</p>
+    row.className = "item-row";
 
-            <button class="btn-primary" onclick="completeTask('${task._id}')">
-                Complete Task
-            </button>
+    const taskLink = document.createElement("a");
+    taskLink.href = `/html/task.html?id=${task._id}`;
+    taskLink.textContent = task.name;
+    taskLink.className = "item-name";
 
-            <button class="btn-secondary" onclick="deleteTask('${task._id}')">
-                Delete Task
-            </button>
-        `;
+    const score = document.createElement("span");
+    score.textContent = task.priorityScore;
+    score.className = "item-score";
 
-    tasksList.appendChild(div);
+    row.appendChild(taskLink);
+    row.appendChild(score);
+
+    tasksList.appendChild(row);
   });
 }
 
@@ -84,147 +114,68 @@ function renderTasks(tasks) {
 // ADD TASK
 // -------------------------
 
-addTaskBtn.addEventListener("click", async () => {
-  const name = document.getElementById("task-name").value;
-  const details = document.getElementById("task-details").value;
-
-  if (!name.trim()) {
-    alert("Task name required");
-    return;
-  }
-
-  try {
-    const response = await fetch(`/api/projects/${projectId}/tasks`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: localStorage.getItem("token"),
-        //    Authorization: `Bearer ${localStorage.getItem("token")}`,
-      },
-      body: JSON.stringify({ name, details }),
-    });
-
-    if (response.ok) {
-      loadProject();
-      document.getElementById("task-name").value = "";
-      document.getElementById("task-details").value = "";
-    } else {
-      alert("Error adding task");
-    }
-  } catch (err) {
-    console.error(err);
-    alert("Server error");
-  }
+addTaskBtn.addEventListener("click", () => {
+  window.location.href = `/html/create-task.html?projectId=${projectId}`;
 });
 
 // -------------------------
-// COMPLETE TASK
+// EDIT TASKS
 // -------------------------
 
-async function completeTask(taskId) {
-  try {
-    const response = await fetch(`/api/tasks/${taskId}/complete`, {
-      method: "POST",
-      headers: {
-        Authorization: localStorage.getItem("token"),
-        //    Authorization: `Bearer ${localStorage.getItem("token")}`,
-      },
-    });
-
-    if (response.ok) {
-      loadProject();
-    } else {
-      alert("Error completing task");
-    }
-  } catch (err) {
-    console.error(err);
-    alert("Server error");
-  }
-}
+editTasksBtn.addEventListener("click", () => {
+  window.location.href = `/html/task-scores.html?projectId=${projectId}`;
+});
 
 // -------------------------
-// DELETE TASK
+// PROJECT DETAILS
 // -------------------------
 
-async function deleteTask(taskId) {
-  try {
-    const response = await fetch(`/api/tasks/${taskId}`, {
-      method: "DELETE",
-      headers: {
-        Authorization: localStorage.getItem("token"),
-        //    Authorization: `Bearer ${localStorage.getItem("token")}`,
-      },
-    });
+projectDetailsBtn.addEventListener("click", () => {
+  window.location.href = `/html/project-details.html?id=${projectId}`;
+});
 
-    if (response.ok) {
-      loadProject();
-    } else {
-      alert("Error deleting task");
-    }
-  } catch (err) {
-    console.error(err);
-    alert("Server error");
-  }
-}
+// -------------------------
+// COMPLETED TASKS
+// -------------------------
+
+completedTasksBtn.addEventListener("click", () => {
+  window.location.href = `/html/completed-tasks.html?projectId=${projectId}`;
+});
 
 // -------------------------
 // COMPLETE PROJECT
 // -------------------------
 
 completeProjectBtn.addEventListener("click", async () => {
-  if (!confirm("Complete entire project?")) return;
+  if (!confirm("Mark this project as completed?")) {
+    return;
+  }
 
   try {
     const response = await fetch(`/api/projects/${projectId}/complete`, {
       method: "POST",
       headers: {
         Authorization: localStorage.getItem("token"),
-        //    Authorization: `Bearer ${localStorage.getItem("token")}`,
       },
     });
 
-    if (response.ok) {
-      alert("Project completed!");
-      window.location.href = "projects.html";
-    } else {
-      alert("Error completing project");
+    if (!response.ok) {
+      throw new Error("Could not complete project");
     }
+
+    window.location.href = "/html/projects.html";
   } catch (err) {
     console.error(err);
-    alert("Server error");
+    alert("Error completing project");
   }
 });
 
 // -------------------------
-// DELETE PROJECT
+// START
 // -------------------------
 
-deleteProjectBtn.addEventListener("click", async () => {
-  if (!confirm("Delete this project?")) return;
-
-  try {
-    const response = await fetch(`/api/projects/${projectId}`, {
-      method: "DELETE",
-      headers: {
-        Authorization: localStorage.getItem("token"),
-        //    Authorization: `Bearer ${localStorage.getItem("token")}`,
-      },
-    });
-
-    if (response.ok) {
-      alert("Project deleted");
-      window.location.href = "projects.html";
-    } else {
-      alert("Error deleting project");
-    }
-  } catch (err) {
-    console.error(err);
-    alert("Server error");
-  }
-});
-
-// -------------------------
-// INIT
-// -------------------------
-
-loadProject();
+if (!projectId) {
+  projectTitle.textContent = "No project selected";
+} else {
+  loadProject();
+}

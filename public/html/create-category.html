@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Project</title>
+    <title>Create Category</title>
     <link rel="stylesheet" href="/css/styles.css">
 </head>
 
@@ -22,37 +22,27 @@
             </nav>
         </header>
 
-        <h1 id="project-title">Loading...</h1>
+        <h1>Create Category</h1>
 
-        <button id="create-task-btn">
-            Add Task
-        </button>
+        <form id="create-category-form">
 
-        <button id="task-scores-btn">
-            Edit Scores
-        </button>
+            <label for="name">
+                Category Name
+            </label>
 
-        <button id="project-details-btn">
-            Project Details
-        </button>
+            <input type="text" id="name" required>
 
-        <button id="completed-tasks-btn">
-            Completed Tasks
-        </button>
+            <br><br>
 
-        <button id="complete-project-btn">
-            Project Completed
-        </button>
+            <button type="submit">
+                Create Category
+            </button>
 
-        <br><br>
-
-        <div id="tasks-list">
-            Loading...
-        </div>
+        </form>
 
     </div>
 
-    <script src="/js/project.js"></script>
+    <script src="/js/create-category.js"></script>
 
 </body>
 

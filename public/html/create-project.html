@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Project</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+
+<body>
+
+    <div class="container">
+
+        <header>
+            <nav class="top-nav">
+                <a href="/index.html">Home</a>
+                <a href="/html/projects.html">Projects</a>
+                <a href="/html/priority-tasks.html">Priority Tasks</a>
+                <a href="/html/categories.html">Categories</a>
+                <a href="/html/containers.html">Containers</a>
+            </nav>
+        </header>
+
+        <h1>Create Project</h1>
+
+        <form id="create-project-form">
+
+            <label for="title">
+                Project Title
+            </label>
+
+            <input type="text" id="title" required>
+
+            <label for="description">
+                Description
+            </label>
+
+            <textarea id="description"></textarea>
+
+            <label for="container">
+                Container
+            </label>
+
+            <select id="container">
+                <option value="">No container</option>
+            </select>
+
+            <br><br>
+
+            <button type="submit">
+                Create Project
+            </button>
+
+        </form>
+
+    </div>
+
+    <script src="/js/create-project.js"></script>
+
+</body>
+
+</html>

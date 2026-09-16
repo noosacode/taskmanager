@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Project</title>
+    <title>Create Task</title>
     <link rel="stylesheet" href="/css/styles.css">
 </head>
 
@@ -22,37 +22,33 @@
             </nav>
         </header>
 
-        <h1 id="project-title">Loading...</h1>
+        <h1 id="project-title">Create Task</h1>
 
-        <button id="create-task-btn">
-            Add Task
-        </button>
+        <form id="create-task-form">
 
-        <button id="task-scores-btn">
-            Edit Scores
-        </button>
+            <label for="name">
+                Task Name
+            </label>
 
-        <button id="project-details-btn">
-            Project Details
-        </button>
+            <input type="text" id="name" required>
 
-        <button id="completed-tasks-btn">
-            Completed Tasks
-        </button>
+            <label for="details">
+                Details
+            </label>
 
-        <button id="complete-project-btn">
-            Project Completed
-        </button>
+            <textarea id="details"></textarea>
 
-        <br><br>
+            <br><br>
 
-        <div id="tasks-list">
-            Loading...
-        </div>
+            <button type="submit">
+                Create Task
+            </button>
+
+        </form>
 
     </div>
 
-    <script src="/js/project.js"></script>
+    <script src="/js/create-task.js"></script>
 
 </body>
 

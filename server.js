@@ -699,6 +699,26 @@ app.post("/api/categories", auth, async (req, res) => {
   }
 });
 
+// Get one category
+app.get("/api/categories/:id", auth, async (req, res) => {
+  try {
+    const category = await Category.findById(req.params.id);
+
+    if (!category) {
+      return res.status(404).json({
+        message: "Category not found.",
+      });
+    }
+
+    res.json(category);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({
+      message: "Error loading category.",
+    });
+  }
+});
+
 // Delete category
 //
 // Tasks using this category are not deleted.
