@@ -49,20 +49,16 @@ function renderProject(project) {
   projectDetails.innerHTML = "";
 
   const description = document.createElement("p");
-  description.textContent =
-    project.description || "No description.";
+  description.textContent = project.description || "No description.";
 
   const container = document.createElement("p");
-  container.textContent =
-    `Container: ${project.container ? project.container.name : "None"}`;
+  container.textContent = `Container: ${project.container ? project.container.name : "None"}`;
 
   const created = document.createElement("p");
-  created.textContent =
-    `Created: ${new Date(project.createdAt).toLocaleString()}`;
+  created.textContent = `Created: ${new Date(project.createdAt).toLocaleString()}`;
 
   const updated = document.createElement("p");
-  updated.textContent =
-    `Last modified: ${new Date(project.updatedAt).toLocaleString()}`;
+  updated.textContent = `Last modified: ${new Date(project.updatedAt).toLocaleString()}`;
 
   projectDetails.appendChild(description);
   projectDetails.appendChild(container);
@@ -71,8 +67,7 @@ function renderProject(project) {
 
   if (project.completedAt) {
     const completed = document.createElement("p");
-    completed.textContent =
-      `Completed: ${new Date(project.completedAt).toLocaleString()}`;
+    completed.textContent = `Completed: ${new Date(project.completedAt).toLocaleString()}`;
 
     projectDetails.appendChild(completed);
   }
@@ -83,8 +78,7 @@ function renderProject(project) {
 // -------------------------
 
 editProjectBtn.addEventListener("click", () => {
-  window.location.href =
-    `/html/edit-project.html?id=${projectId}`;
+  window.location.href = `/html/edit-project.html?id=${projectId}`;
 });
 
 // -------------------------
