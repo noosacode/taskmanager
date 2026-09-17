@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Containers</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+
+<body>
+
+    <div class="container">
+
+        <header>
+            <nav class="top-nav">
+                <a href="/index.html">Home</a>
+                <a href="/html/projects.html">Projects</a>
+                <a href="/html/priority-tasks.html">Priority Tasks</a>
+                <a href="/html/categories.html">Categories</a>
+                <a href="/html/containers.html">Containers</a>
+            </nav>
+        </header>
+
+        <h1>Edit Containers</h1>
+
+        <form id="create-container-form">
+
+            <label for="name">Container Name</label>
+            <input type="text" id="name" required>
+
+            <button type="submit">Add Container</button>
+
+        </form>
+
+        <br><br>
+
+        <div id="containers-list">
+            Loading...
+        </div>
+
+    </div>
+
+    <script src="/js/edit-containers.js"></script>
+
+</body>
+
+</html>

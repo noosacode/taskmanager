@@ -431,7 +431,9 @@ app.post("/api/projects/:projectId/tasks", auth, async (req, res) => {
 // Get one task
 app.get("/api/tasks/:id", auth, async (req, res) => {
   try {
-    const task = await Task.findById(req.params.id).populate("category");
+    const task = await Task.findById(req.params.id)
+      .populate("projectId", "title")
+      .populate("category");
 
     if (!task) {
       return res.status(404).json({
@@ -456,12 +458,12 @@ app.put("/api/tasks/:id", auth, async (req, res) => {
       updates.name = req.body.name;
     }
 
-    if (req.body.details !== undefined) {
-      updates.details = req.body.details;
+    if (req.body.description !== undefined) {
+      updates.description = req.body.description;
     }
 
-    if (req.body.priorityScore !== undefined) {
-      updates.priorityScore = req.body.priorityScore;
+    if (req.body.notes !== undefined) {
+      updates.notes = req.body.notes;
     }
 
     if (req.body.category !== undefined) {
@@ -481,7 +483,9 @@ app.put("/api/tasks/:id", auth, async (req, res) => {
     const task = await Task.findByIdAndUpdate(req.params.id, updates, {
       new: true,
       runValidators: true,
-    }).populate("category");
+    })
+      .populate("projectId", "title")
+      .populate("category");
 
     if (!task) {
       return res.status(404).json({

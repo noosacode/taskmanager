@@ -14,7 +14,13 @@ const TaskSchema = new mongoose.Schema(
       trim: true,
     },
 
-    details: {
+    description: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+
+    notes: {
       type: String,
       default: "",
       trim: true,

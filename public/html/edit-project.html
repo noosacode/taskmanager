@@ -1,0 +1,59 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Project</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+
+<body>
+
+    <div class="container">
+
+        <header>
+            <nav class="top-nav">
+                <a href="/index.html">Home</a>
+                <a href="/html/projects.html">Projects</a>
+                <a href="/html/priority-tasks.html">Priority Tasks</a>
+                <a href="/html/categories.html">Categories</a>
+                <a href="/html/containers.html">Containers</a>
+            </nav>
+        </header>
+
+        <h1 id="project-title">Edit Project</h1>
+
+        <button type="button" id="back-btn">Back</button>
+        <button type="button" id="delete-project-btn">Delete Project</button>
+
+        <br><br>
+
+        <form id="edit-project-form">
+
+            <label for="title">Project Name</label>
+            <input type="text" id="title" required>
+
+            <label for="description">Description</label>
+            <textarea id="description"></textarea>
+
+            <label for="container">Container</label>
+            <select id="container">
+                <option value="">No container</option>
+            </select>
+
+            <br><br>
+
+            <button type="submit">Save Changes</button>
+
+        </form>
+
+    </div>
+
+    <script src="/js/edit-project.js"></script>
+
+</body>
+
+</html>
+```

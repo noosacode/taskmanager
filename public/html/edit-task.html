@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Task</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+
+<body>
+
+    <div class="container">
+
+        <header>
+            <nav class="top-nav">
+                <a href="/index.html">Home</a>
+                <a href="/html/projects.html">Projects</a>
+                <a href="/html/priority-tasks.html">Priority Tasks</a>
+                <a href="/html/categories.html">Categories</a>
+                <a href="/html/containers.html">Containers</a>
+            </nav>
+        </header>
+
+        <h1 id="task-title">Edit Task</h1>
+
+        <button id="back-btn">Back</button>
+        <button id="delete-task-btn">Delete Task</button>
+
+        <form id="edit-task-form">
+
+            <label for="name">Task Name</label>
+            <input type="text" id="name" required>
+
+            <label for="description">Description</label>
+            <textarea id="description"></textarea>
+
+            <label for="notes">Task Notes</label>
+            <textarea id="notes"></textarea>
+
+            <br>
+
+            <label for="category">Category</label>
+            <select id="category">
+                <option value="">No category</option>
+            </select>
+
+            <label for="status">Status</label>
+            <select id="status">
+                <option value="active">Active</option>
+                <option value="completed">Completed</option>
+            </select>
+
+            <br><br>
+
+            <button type="submit">Save Changes</button>
+
+        </form>
+
+        <br>
+
+    </div>
+
+    <script src="/js/edit-task.js"></script>
+
+</body>
+
+</html>
