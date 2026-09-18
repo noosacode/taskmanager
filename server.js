@@ -204,12 +204,16 @@ app.put("/api/projects/:id", auth, async (req, res) => {
       updates.description = req.body.description;
     }
 
+    if (req.body.notes !== undefined) {
+      updates.notes = req.body.notes;
+    }
+
     if (req.body.container !== undefined) {
       updates.container = req.body.container || null;
     }
 
     const project = await Project.findByIdAndUpdate(req.params.id, updates, {
-      new: true,
+      returnDocument: "after",
       runValidators: true,
     }).populate("container");
 
@@ -239,7 +243,7 @@ app.put("/api/projects/:id/priority", auth, async (req, res) => {
         projectPriorityScore: req.body.projectPriorityScore,
       },
       {
-        new: true,
+        returnDocument: "after",
         runValidators: true,
       },
     );
@@ -267,7 +271,7 @@ app.post("/api/projects/:id/inactivate", auth, async (req, res) => {
         status: "inactive",
       },
       {
-        new: true,
+        returnDocument: "after",
         runValidators: true,
       },
     );
@@ -296,7 +300,7 @@ app.post("/api/projects/:id/activate", auth, async (req, res) => {
         completedAt: null,
       },
       {
-        new: true,
+        returnDocument: "after",
         runValidators: true,
       },
     );
@@ -327,7 +331,7 @@ app.post("/api/projects/:id/complete", auth, async (req, res) => {
         completedAt: new Date(),
       },
       {
-        new: true,
+        returnDocument: "after",
         runValidators: true,
       },
     );
@@ -466,6 +470,10 @@ app.put("/api/tasks/:id", auth, async (req, res) => {
       updates.notes = req.body.notes;
     }
 
+    if (req.body.priorityScore !== undefined) {
+      updates.priorityScore = req.body.priorityScore;
+    }
+
     if (req.body.category !== undefined) {
       updates.category = req.body.category || null;
     }
@@ -481,7 +489,7 @@ app.put("/api/tasks/:id", auth, async (req, res) => {
     }
 
     const task = await Task.findByIdAndUpdate(req.params.id, updates, {
-      new: true,
+      returnDocument: "after",
       runValidators: true,
     })
       .populate("projectId", "title")
@@ -513,7 +521,7 @@ app.post("/api/tasks/:id/complete", auth, async (req, res) => {
         completedAt: new Date(),
       },
       {
-        new: true,
+        returnDocument: "after",
         runValidators: true,
       },
     );
@@ -542,7 +550,7 @@ app.post("/api/tasks/:id/reopen", auth, async (req, res) => {
         completedAt: null,
       },
       {
-        new: true,
+        returnDocument: "after",
         runValidators: true,
       },
     );
@@ -860,7 +868,7 @@ app.put("/api/containers/:id", auth, async (req, res) => {
         name,
       },
       {
-        new: true,
+        returnDocument: "after",
         runValidators: true,
       },
     );

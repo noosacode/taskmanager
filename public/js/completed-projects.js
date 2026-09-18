@@ -40,4 +40,82 @@ async function loadCompletedProjects() {
 
       name.appendChild(projectLink);
 
-      const completedDate = document.createElement("div
+      const completedDate = document.createElement("div");
+      completedDate.textContent = project.completedAt
+        ? new Date(project.completedAt).toLocaleString()
+        : "No date";
+
+      const statusButton = document.createElement("button");
+      statusButton.textContent = "Change Status";
+      statusButton.addEventListener("click", () => {
+        changeStatus(project);
+      });
+
+      const deleteButton = document.createElement("button");
+      deleteButton.textContent = "Delete";
+      deleteButton.addEventListener("click", () => {
+        deleteProject(project);
+      });
+
+      row.appendChild(name);
+      row.appendChild(completedDate);
+      row.appendChild(statusButton);
+      row.appendChild(deleteButton);
+
+      projectsList.appendChild(row);
+    });
+  } catch (err) {
+    console.error(err);
+    projectsList.textContent = "Error loading completed projects.";
+  }
+}
+
+async function changeStatus(project) {
+  try {
+    const response = await fetch(`/api/projects/${project._id}/activate`, {
+      method: "POST",
+      headers: {
+        Authorization: localStorage.getItem("token"),
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error("Could not activate project");
+    }
+
+    window.location.href = "/html/projects.html";
+  } catch (err) {
+    console.error(err);
+    alert("Error changing project status.");
+  }
+}
+
+async function deleteProject(project) {
+  if (
+    !confirm(
+      `Delete "${project.title}" and all its tasks? This cannot be undone.`
+    )
+  ) {
+    return;
+  }
+
+  try {
+    const response = await fetch(`/api/projects/${project._id}`, {
+      method: "DELETE",
+      headers: {
+        Authorization: localStorage.getItem("token"),
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error("Could not delete project");
+    }
+
+    loadCompletedProjects();
+  } catch (err) {
+    console.error(err);
+    alert("Error deleting project.");
+  }
+}
+
+loadCompletedProjects();

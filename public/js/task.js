@@ -1,3 +1,7 @@
+// -------------------------
+// TASK PAGE
+// -------------------------
+
 const urlParams = new URLSearchParams(window.location.search);
 const taskId = urlParams.get("id");
 
@@ -8,6 +12,11 @@ const taskNotes = document.getElementById("task-notes");
 
 const backBtn = document.getElementById("back-btn");
 const editTaskBtn = document.getElementById("edit-task-btn");
+const projectBtn = document.getElementById("project-btn");
+
+// -------------------------
+// LOAD TASK
+// -------------------------
 
 async function loadTask() {
   try {
@@ -33,12 +42,21 @@ async function loadTask() {
   }
 }
 
+// -------------------------
+// RENDER TASK
+// -------------------------
+
 function renderTask(task) {
   taskTitle.textContent = task.name;
 
-  taskDescription.textContent = task.description || "No description.";
+  taskDescription.textContent =
+    task.description || "No description.";
 
-  taskNotes.textContent = task.notes || "No notes.";
+  taskNotes.textContent =
+    task.notes || "No notes.";
+
+  // Store the project ID for the This Project button.
+  projectBtn.dataset.projectId = task.projectId._id;
 
   taskInfo.innerHTML = "";
 
@@ -74,7 +92,9 @@ function renderTask(task) {
 
   createdLine.appendChild(createdLabel);
   createdLine.appendChild(
-    document.createTextNode(new Date(task.createdAt).toLocaleString()),
+    document.createTextNode(
+      new Date(task.createdAt).toLocaleString()
+    )
   );
 
   const updatedLine = document.createElement("p");
@@ -83,7 +103,9 @@ function renderTask(task) {
 
   updatedLine.appendChild(updatedLabel);
   updatedLine.appendChild(
-    document.createTextNode(new Date(task.updatedAt).toLocaleString()),
+    document.createTextNode(
+      new Date(task.updatedAt).toLocaleString()
+    )
   );
 
   const completedLine = document.createElement("p");
@@ -94,10 +116,14 @@ function renderTask(task) {
 
   if (task.completedAt) {
     completedLine.appendChild(
-      document.createTextNode(new Date(task.completedAt).toLocaleString()),
+      document.createTextNode(
+        new Date(task.completedAt).toLocaleString()
+      )
     );
   } else {
-    completedLine.appendChild(document.createTextNode("No"));
+    completedLine.appendChild(
+      document.createTextNode("No")
+    );
   }
 
   taskInfo.appendChild(projectLine);
@@ -107,13 +133,35 @@ function renderTask(task) {
   taskInfo.appendChild(completedLine);
 }
 
+// -------------------------
+// BACK BUTTON
+// -------------------------
+
 backBtn.addEventListener("click", () => {
   window.history.back();
 });
 
+// -------------------------
+// EDIT TASK BUTTON
+// -------------------------
+
 editTaskBtn.addEventListener("click", () => {
   window.location.href = `/html/edit-task.html?id=${taskId}`;
 });
+
+// -------------------------
+// THIS PROJECT BUTTON
+// -------------------------
+
+projectBtn.addEventListener("click", () => {
+  const projectId = projectBtn.dataset.projectId;
+
+  window.location.href = `/html/project.html?id=${projectId}`;
+});
+
+// -------------------------
+// START
+// -------------------------
 
 if (!taskId) {
   taskTitle.textContent = "No task selected";

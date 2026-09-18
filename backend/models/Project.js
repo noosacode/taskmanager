@@ -21,6 +21,12 @@ const ProjectSchema = new mongoose.Schema(
       max: 99,
     },
 
+    notes: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+
     status: {
       type: String,
       enum: ["active", "inactive", "completed"],

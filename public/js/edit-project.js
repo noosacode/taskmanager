@@ -6,6 +6,7 @@ const form = document.getElementById("edit-project-form");
 
 const titleInput = document.getElementById("title");
 const descriptionInput = document.getElementById("description");
+const notesInput = document.getElementById("notes");
 const containerSelect = document.getElementById("container");
 
 const backBtn = document.getElementById("back-btn");
@@ -54,6 +55,7 @@ async function loadProject() {
 
     titleInput.value = project.title || "";
     descriptionInput.value = project.description || "";
+    notesInput.value = project.notes || "";
 
     if (project.container) {
       containerSelect.value = project.container._id;
@@ -71,6 +73,7 @@ form.addEventListener("submit", async (event) => {
 
   const title = titleInput.value.trim();
   const description = descriptionInput.value.trim();
+  const notes = notesInput.value.trim();
   const container = containerSelect.value || null;
 
   try {
@@ -83,6 +86,7 @@ form.addEventListener("submit", async (event) => {
       body: JSON.stringify({
         title,
         description,
+        notes,
         container,
       }),
     });

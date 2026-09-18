@@ -12,6 +12,9 @@ const projectId = urlParams.get("id");
 const projectTitle = document.getElementById("project-title");
 const projectDetails = document.getElementById("project-details");
 const editProjectBtn = document.getElementById("edit-project-btn");
+const backBtn = document.getElementById("back-btn");
+const projectBtn = document.getElementById("project-btn");
+const projectNotes = document.getElementById("project-notes");
 
 // -------------------------
 // LOAD PROJECT
@@ -45,6 +48,7 @@ async function loadProject() {
 
 function renderProject(project) {
   projectTitle.textContent = project.title;
+  projectNotes.textContent = project.notes || "No notes.";
 
   projectDetails.innerHTML = "";
 
@@ -74,11 +78,19 @@ function renderProject(project) {
 }
 
 // -------------------------
-// EDIT PROJECT
+// Buttons
 // -------------------------
 
 editProjectBtn.addEventListener("click", () => {
   window.location.href = `/html/edit-project.html?id=${projectId}`;
+});
+
+backBtn.addEventListener("click", () => {
+  window.history.back();
+});
+
+projectBtn.addEventListener("click", () => {
+  window.location.href = `/html/project.html?id=${projectId}`;
 });
 
 // -------------------------
@@ -91,3 +103,4 @@ if (!projectId) {
 } else {
   loadProject();
 }
+
