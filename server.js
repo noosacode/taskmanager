@@ -441,8 +441,8 @@ app.post("/api/projects/:projectId/tasks", auth, async (req, res) => {
     const task = new Task({
       projectId: req.params.projectId,
       name: req.body.name,
-      details: req.body.details,
-      priorityScore: req.body.priorityScore,
+      description: req.body.description,
+      notes: req.body.notes,
       session: req.body.session || null,
     });
 

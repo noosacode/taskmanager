@@ -45,7 +45,7 @@ form.addEventListener("submit", async (event) => {
   event.preventDefault();
 
   const name = document.getElementById("name").value.trim();
-  const details = document.getElementById("details").value.trim();
+  const description = document.getElementById("description").value.trim();
 
   try {
     const response = await fetch(`/api/projects/${projectId}/tasks`, {
@@ -56,7 +56,7 @@ form.addEventListener("submit", async (event) => {
       },
       body: JSON.stringify({
         name,
-        details,
+        description,
       }),
     });
 
