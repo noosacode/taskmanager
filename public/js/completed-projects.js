@@ -1,4 +1,5 @@
 const projectsList = document.getElementById("projects-list");
+const projectsBtn = document.getElementById("projects-btn");
 
 async function loadCompletedProjects() {
   try {
@@ -46,7 +47,7 @@ async function loadCompletedProjects() {
         : "No date";
 
       const statusButton = document.createElement("button");
-      statusButton.textContent = "Change Status";
+      statusButton.textContent = "Reopen Project";
       statusButton.addEventListener("click", () => {
         changeStatus(project);
       });
@@ -117,5 +118,9 @@ async function deleteProject(project) {
     alert("Error deleting project.");
   }
 }
+
+projectsBtn.addEventListener("click", () => {
+  window.location.href = "/html/projects.html";
+});
 
 loadCompletedProjects();

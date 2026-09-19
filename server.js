@@ -116,6 +116,26 @@ app.get("/api/projects", auth, async (req, res) => {
   }
 });
 
+// Get completed projects
+// Most recently completed first.
+app.get("/api/projects/completed", auth, async (req, res) => {
+  try {
+    const projects = await Project.find({
+      status: "completed",
+    }).sort({
+      completedAt: -1,
+    });
+
+    res.json(projects);
+  } catch (error) {
+    console.error("Completed projects error:", error);
+
+    res.status(500).json({
+      error: error.message,
+    });
+  }
+});
+
 // Get inactive projects
 app.get("/api/projects/inactive", auth, async (req, res) => {
   try {
@@ -133,16 +153,21 @@ app.get("/api/projects/inactive", auth, async (req, res) => {
   }
 });
 
-// Get completed projects
+// Get completed tasks
 // Most recently completed first.
-app.get("/api/projects/completed", auth, async (req, res) => {
+app.get("/api/tasks/completed", auth, async (req, res) => {
   try {
-    const projects = await Project.find({
-      status: "completed",
-    }).sort({ completedAt: -1 });
+    const tasks = await Task.find({
+      projectId: req.query.projectId,
+      completed: true,
+    })
+      .populate("projectId", "title")
+      .sort({ completedAt: -1 });
 
-    res.json(projects);
+    res.json(tasks);
   } catch (error) {
+    console.error("Completed tasks error:", error);
+
     res.status(500).json({
       error: error.message,
     });
@@ -383,14 +408,13 @@ app.delete("/api/projects/:id", auth, async (req, res) => {
 
 // Get all tasks for a project
 //
-// Completed tasks are included here because completed tasks
-// remain attached to their project.
+// Get active tasks for a project
 app.get("/api/projects/:projectId/tasks", auth, async (req, res) => {
   try {
     const tasks = await Task.find({
       projectId: req.params.projectId,
+      completed: false,
     }).sort({
-      completed: 1,
       priorityScore: -1,
       name: 1,
     });
@@ -562,24 +586,6 @@ app.post("/api/tasks/:id/reopen", auth, async (req, res) => {
     }
 
     res.json(task);
-  } catch (error) {
-    res.status(500).json({
-      error: error.message,
-    });
-  }
-});
-
-// Get completed tasks
-// Most recently completed first.
-app.get("/api/tasks/completed", auth, async (req, res) => {
-  try {
-    const tasks = await Task.find({
-      completed: true,
-    })
-      .populate("projectId", "title")
-      .sort({ completedAt: -1 });
-
-    res.json(tasks);
   } catch (error) {
     res.status(500).json({
       error: error.message,

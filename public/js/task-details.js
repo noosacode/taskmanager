@@ -1,5 +1,5 @@
 // -------------------------
-// TASK PAGE
+// TASK DETAILS PAGE
 // -------------------------
 
 const urlParams = new URLSearchParams(window.location.search);
@@ -10,6 +10,8 @@ const taskDescription = document.getElementById("task-description");
 const taskInfo = document.getElementById("task-info");
 const taskNotes = document.getElementById("task-notes");
 
+const completeTaskBtn = document.getElementById("complete-task-btn");
+const deleteTaskBtn = document.getElementById("delete-task-btn");
 const backBtn = document.getElementById("back-btn");
 const editTaskBtn = document.getElementById("edit-task-btn");
 const projectBtn = document.getElementById("project-btn");
@@ -49,13 +51,10 @@ async function loadTask() {
 function renderTask(task) {
   taskTitle.textContent = task.name;
 
-  taskDescription.textContent =
-    task.description || "No description.";
+  taskDescription.textContent = task.description || "No description.";
 
-  taskNotes.textContent =
-    task.notes || "No notes.";
+  taskNotes.textContent = task.notes || "No notes.";
 
-  // Store the project ID for the This Project button.
   projectBtn.dataset.projectId = task.projectId._id;
 
   taskInfo.innerHTML = "";
@@ -92,9 +91,7 @@ function renderTask(task) {
 
   createdLine.appendChild(createdLabel);
   createdLine.appendChild(
-    document.createTextNode(
-      new Date(task.createdAt).toLocaleString()
-    )
+    document.createTextNode(new Date(task.createdAt).toLocaleString()),
   );
 
   const updatedLine = document.createElement("p");
@@ -103,35 +100,77 @@ function renderTask(task) {
 
   updatedLine.appendChild(updatedLabel);
   updatedLine.appendChild(
-    document.createTextNode(
-      new Date(task.updatedAt).toLocaleString()
-    )
+    document.createTextNode(new Date(task.updatedAt).toLocaleString()),
   );
 
-  const completedLine = document.createElement("p");
-  const completedLabel = document.createElement("strong");
-  completedLabel.textContent = "Completed: ";
-
-  completedLine.appendChild(completedLabel);
-
   if (task.completedAt) {
-    completedLine.appendChild(
-      document.createTextNode(
-        new Date(task.completedAt).toLocaleString()
-      )
-    );
-  } else {
-    completedLine.appendChild(
-      document.createTextNode("No")
-    );
+    const completedLine = document.createElement("p");
+    completedLine.textContent = `Completed: ${new Date(task.completedAt).toLocaleString()}`;
+
+    taskInfo.appendChild(completedLine);
   }
 
   taskInfo.appendChild(projectLine);
   taskInfo.appendChild(categoryLine);
   taskInfo.appendChild(createdLine);
   taskInfo.appendChild(updatedLine);
-  taskInfo.appendChild(completedLine);
 }
+
+// -------------------------
+// COMPLETE TASK
+// -------------------------
+
+completeTaskBtn.addEventListener("click", async () => {
+  if (!confirm("Mark this task as completed?")) {
+    return;
+  }
+
+  try {
+    const response = await fetch(`/api/tasks/${taskId}/complete`, {
+      method: "POST",
+      headers: {
+        Authorization: localStorage.getItem("token"),
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error("Could not complete task");
+    }
+
+    window.location.href = `/html/project.html?id=${projectBtn.dataset.projectId}`;
+  } catch (err) {
+    console.error(err);
+    alert("Error completing task");
+  }
+});
+
+// -------------------------
+// DELETE TASK
+// -------------------------
+
+deleteTaskBtn.addEventListener("click", async () => {
+  if (!confirm("Delete this task? This cannot be undone.")) {
+    return;
+  }
+
+  try {
+    const response = await fetch(`/api/tasks/${taskId}`, {
+      method: "DELETE",
+      headers: {
+        Authorization: localStorage.getItem("token"),
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error("Could not delete task");
+    }
+
+    window.location.href = `/html/project.html?id=${projectBtn.dataset.projectId}`;
+  } catch (err) {
+    console.error(err);
+    alert("Error deleting task");
+  }
+});
 
 // -------------------------
 // BACK BUTTON
@@ -150,7 +189,7 @@ editTaskBtn.addEventListener("click", () => {
 });
 
 // -------------------------
-// THIS PROJECT BUTTON
+// TASKS BUTTON
 // -------------------------
 
 projectBtn.addEventListener("click", () => {

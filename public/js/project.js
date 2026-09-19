@@ -16,7 +16,6 @@ const addTaskBtn = document.getElementById("create-task-btn");
 const editTasksBtn = document.getElementById("task-scores-btn");
 const projectDetailsBtn = document.getElementById("project-details-btn");
 const completedTasksBtn = document.getElementById("completed-tasks-btn");
-const completeProjectBtn = document.getElementById("complete-project-btn");
 
 // -------------------------
 // LOAD PROJECT
@@ -95,7 +94,7 @@ function renderTasks(tasks) {
     row.className = "item-row";
 
     const taskLink = document.createElement("a");
-    taskLink.href = `/html/task.html?id=${task._id}`;
+    taskLink.href = `/html/task-details.html?id=${task._id}`;
     taskLink.textContent = task.name;
     taskLink.className = "item-name";
 
@@ -140,34 +139,6 @@ projectDetailsBtn.addEventListener("click", () => {
 
 completedTasksBtn.addEventListener("click", () => {
   window.location.href = `/html/completed-tasks.html?projectId=${projectId}`;
-});
-
-// -------------------------
-// COMPLETE PROJECT
-// -------------------------
-
-completeProjectBtn.addEventListener("click", async () => {
-  if (!confirm("Mark this project as completed?")) {
-    return;
-  }
-
-  try {
-    const response = await fetch(`/api/projects/${projectId}/complete`, {
-      method: "POST",
-      headers: {
-        Authorization: localStorage.getItem("token"),
-      },
-    });
-
-    if (!response.ok) {
-      throw new Error("Could not complete project");
-    }
-
-    window.location.href = "/html/projects.html";
-  } catch (err) {
-    console.error(err);
-    alert("Error completing project");
-  }
 });
 
 // -------------------------

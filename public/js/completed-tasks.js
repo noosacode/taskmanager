@@ -1,12 +1,18 @@
+const urlParams = new URLSearchParams(window.location.search);
+const projectId = urlParams.get("projectId");
+const projectBtn = document.getElementById("project-btn");
 const tasksList = document.getElementById("tasks-list");
 
 async function loadCompletedTasks() {
   try {
-    const response = await fetch("/api/tasks/completed", {
-      headers: {
-        Authorization: localStorage.getItem("token"),
+    const response = await fetch(
+      `/api/tasks/completed?projectId=${projectId}`,
+      {
+        headers: {
+          Authorization: localStorage.getItem("token"),
+        },
       },
-    });
+    );
 
     if (!response.ok) {
       throw new Error("Could not load completed tasks");
@@ -35,15 +41,13 @@ async function loadCompletedTasks() {
       name.className = "item-name";
 
       const taskLink = document.createElement("a");
-      taskLink.href = `/html/task.html?id=${task._id}`;
+      taskLink.href = `/html/task-details.html?id=${task._id}`;
       taskLink.textContent = task.name;
 
       name.appendChild(taskLink);
 
       const project = document.createElement("span");
-      project.textContent = task.projectId
-        ? ` — ${task.projectId.title}`
-        : "";
+      project.textContent = task.projectId ? ` — ${task.projectId.title}` : "";
 
       name.appendChild(project);
 
@@ -53,9 +57,9 @@ async function loadCompletedTasks() {
         : "No date";
 
       const statusButton = document.createElement("button");
-      statusButton.textContent = "Change Status";
+      statusButton.textContent = "Reopen Task";
       statusButton.addEventListener("click", () => {
-        changeStatus(task);
+        reopenTask(task);
       });
 
       const deleteButton = document.createElement("button");
@@ -77,58 +81,28 @@ async function loadCompletedTasks() {
   }
 }
 
-async function changeStatus(task) {
-  const newStatus = prompt(
-    `Change status for "${task.name}" to:\n\nactive or completed`
-  );
-
-  if (newStatus === null) {
-    return;
-  }
-
-  const status = newStatus.trim().toLowerCase();
-
-  if (status !== "active" && status !== "completed") {
-    alert("Please enter active or completed.");
-    return;
-  }
-
+async function reopenTask(task) {
   try {
-    let response;
-
-    if (status === "active") {
-      response = await fetch(`/api/tasks/${task._id}/reopen`, {
-        method: "POST",
-        headers: {
-          Authorization: localStorage.getItem("token"),
-        },
-      });
-    } else {
-      response = await fetch(`/api/tasks/${task._id}/complete`, {
-        method: "POST",
-        headers: {
-          Authorization: localStorage.getItem("token"),
-        },
-      });
-    }
+    const response = await fetch(`/api/tasks/${task._id}/reopen`, {
+      method: "POST",
+      headers: {
+        Authorization: localStorage.getItem("token"),
+      },
+    });
 
     if (!response.ok) {
-      throw new Error("Could not change task status");
+      throw new Error("Could not reopen task");
     }
 
     loadCompletedTasks();
   } catch (err) {
     console.error(err);
-    alert("Error changing task status.");
+    alert("Error reopening task.");
   }
 }
 
 async function deleteTask(task) {
-  if (
-    !confirm(
-      `Delete "${task.name}"? This cannot be undone.`
-    )
-  ) {
+  if (!confirm(`Delete "${task.name}"? This cannot be undone.`)) {
     return;
   }
 
@@ -150,5 +124,9 @@ async function deleteTask(task) {
     alert("Error deleting task.");
   }
 }
+
+projectBtn.addEventListener("click", () => {
+  window.location.href = `/html/project.html?id=${projectId}`;
+});      
 
 loadCompletedTasks();

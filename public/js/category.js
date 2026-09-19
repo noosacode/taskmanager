@@ -85,7 +85,7 @@ function renderTasks(tasks) {
     row.className = "item-row";
 
     const taskLink = document.createElement("a");
-    taskLink.href = `/html/task.html?id=${task._id}`;
+    taskLink.href = `/html/task-details.html?id=${task._id}`;
     taskLink.textContent = task.name;
     taskLink.className = "item-name";
 

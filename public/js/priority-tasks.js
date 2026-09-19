@@ -29,7 +29,7 @@ async function loadPriorityTasks() {
       name.className = "item-name";
 
       const taskLink = document.createElement("a");
-      taskLink.href = `/html/task.html?id=${task._id}`;
+      taskLink.href = `/html/task-details.html?id=${task._id}`;
       taskLink.textContent = task.name;
 
       name.appendChild(taskLink);

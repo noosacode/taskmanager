@@ -10,7 +10,6 @@ const notesInput = document.getElementById("notes");
 const containerSelect = document.getElementById("container");
 
 const backBtn = document.getElementById("back-btn");
-const deleteProjectBtn = document.getElementById("delete-project-btn");
 
 async function loadContainers() {
   try {
@@ -104,30 +103,6 @@ form.addEventListener("submit", async (event) => {
 
 backBtn.addEventListener("click", () => {
   window.history.back();
-});
-
-deleteProjectBtn.addEventListener("click", async () => {
-  if (!confirm("Delete this project and all its tasks? This cannot be undone.")) {
-    return;
-  }
-
-  try {
-    const response = await fetch(`/api/projects/${projectId}`, {
-      method: "DELETE",
-      headers: {
-        Authorization: localStorage.getItem("token"),
-      },
-    });
-
-    if (!response.ok) {
-      throw new Error("Could not delete project");
-    }
-
-    window.location.href = "/html/projects.html";
-  } catch (err) {
-    console.error(err);
-    alert("Error deleting project");
-  }
 });
 
 if (!projectId) {

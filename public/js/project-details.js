@@ -11,10 +11,13 @@ const projectId = urlParams.get("id");
 
 const projectTitle = document.getElementById("project-title");
 const projectDetails = document.getElementById("project-details");
-const editProjectBtn = document.getElementById("edit-project-btn");
-const backBtn = document.getElementById("back-btn");
-const projectBtn = document.getElementById("project-btn");
 const projectNotes = document.getElementById("project-notes");
+
+const completeProjectBtn = document.getElementById("complete-project-btn");
+const deleteProjectBtn = document.getElementById("delete-project-btn");
+const backBtn = document.getElementById("back-btn");
+const editProjectBtn = document.getElementById("edit-project-btn");
+const projectBtn = document.getElementById("project-btn");
 
 // -------------------------
 // LOAD PROJECT
@@ -56,7 +59,20 @@ function renderProject(project) {
   description.textContent = project.description || "No description.";
 
   const container = document.createElement("p");
-  container.textContent = `Container: ${project.container ? project.container.name : "None"}`;
+
+  const containerLabel = document.createElement("strong");
+  containerLabel.textContent = "Container: ";
+
+  container.appendChild(containerLabel);
+
+  if (project.container) {
+    const containerLink = document.createElement("a");
+    containerLink.href = `/html/containers.html`;
+    containerLink.textContent = project.container.name;
+    container.appendChild(containerLink);
+  } else {
+    container.appendChild(document.createTextNode("None"));
+  }
 
   const created = document.createElement("p");
   created.textContent = `Created: ${new Date(project.createdAt).toLocaleString()}`;
@@ -78,16 +94,82 @@ function renderProject(project) {
 }
 
 // -------------------------
-// Buttons
+// COMPLETE PROJECT
+// -------------------------
+
+completeProjectBtn.addEventListener("click", async () => {
+  if (!confirm("Mark this project as completed?")) {
+    return;
+  }
+
+  try {
+    const response = await fetch(`/api/projects/${projectId}/complete`, {
+      method: "POST",
+      headers: {
+        Authorization: localStorage.getItem("token"),
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error("Could not complete project");
+    }
+
+    window.location.href = "/html/projects.html";
+  } catch (err) {
+    console.error(err);
+    alert("Error completing project");
+  }
+});
+
+// -------------------------
+// DELETE PROJECT
+// -------------------------
+
+deleteProjectBtn.addEventListener("click", async () => {
+  if (
+    !confirm("Delete this project and all its tasks? This cannot be undone.")
+  ) {
+    return;
+  }
+
+  try {
+    const response = await fetch(`/api/projects/${projectId}`, {
+      method: "DELETE",
+      headers: {
+        Authorization: localStorage.getItem("token"),
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error("Could not delete project");
+    }
+
+    window.location.href = "/html/projects.html";
+  } catch (err) {
+    console.error(err);
+    alert("Error deleting project");
+  }
+});
+
+// -------------------------
+// BACK
+// -------------------------
+
+backBtn.addEventListener("click", () => {
+  window.history.back();
+});
+
+// -------------------------
+// EDIT PROJECT
 // -------------------------
 
 editProjectBtn.addEventListener("click", () => {
   window.location.href = `/html/edit-project.html?id=${projectId}`;
 });
 
-backBtn.addEventListener("click", () => {
-  window.history.back();
-});
+// -------------------------
+// TASKS
+// -------------------------
 
 projectBtn.addEventListener("click", () => {
   window.location.href = `/html/project.html?id=${projectId}`;
@@ -103,4 +185,3 @@ if (!projectId) {
 } else {
   loadProject();
 }
-

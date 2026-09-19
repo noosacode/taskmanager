@@ -12,7 +12,6 @@ const categorySelect = document.getElementById("category");
 const statusSelect = document.getElementById("status");
 
 const backBtn = document.getElementById("back-btn");
-const deleteTaskBtn = document.getElementById("delete-task-btn");
 
 async function loadCategories() {
   try {
@@ -65,7 +64,6 @@ async function loadTask() {
       categorySelect.value = "";
     }
 
-    statusSelect.value = task.completed ? "completed" : "active";
   } catch (err) {
     console.error(err);
     taskTitle.textContent = "Error loading task";
@@ -91,7 +89,6 @@ form.addEventListener("submit", async (event) => {
         description,
         notes,
         category: categorySelect.value || null,
-        completed: statusSelect.value === "completed",
       }),
     });
 
@@ -99,7 +96,7 @@ form.addEventListener("submit", async (event) => {
       throw new Error("Could not update task");
     }
 
-    window.location.href = `/html/task.html?id=${taskId}`;
+    window.location.href = `/html/task-details.html?id=${taskId}`;
   } catch (err) {
     console.error(err);
     alert("Error updating task");
@@ -108,30 +105,6 @@ form.addEventListener("submit", async (event) => {
 
 backBtn.addEventListener("click", () => {
   window.history.back();
-});
-
-deleteTaskBtn.addEventListener("click", async () => {
-  if (!confirm("Delete this task? This cannot be undone.")) {
-    return;
-  }
-
-  try {
-    const response = await fetch(`/api/tasks/${taskId}`, {
-      method: "DELETE",
-      headers: {
-        Authorization: localStorage.getItem("token"),
-      },
-    });
-
-    if (!response.ok) {
-      throw new Error("Could not delete task");
-    }
-
-    window.history.back();
-  } catch (err) {
-    console.error(err);
-    alert("Error deleting task");
-  }
 });
 
 if (!taskId) {
