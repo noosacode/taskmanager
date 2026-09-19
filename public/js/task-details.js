@@ -78,7 +78,7 @@ function renderTask(task) {
 
   if (task.category) {
     const categoryLink = document.createElement("a");
-    categoryLink.href = `/html/category.html?id=${task.category._id}`;
+    categoryLink.href = `/html/session.html?id=${task.category._id}`;
     categoryLink.textContent = task.category.name;
     categoryLine.appendChild(categoryLink);
   } else {

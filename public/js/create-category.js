@@ -29,7 +29,7 @@ form.addEventListener("submit", async (event) => {
       throw new Error("Could not create category");
     }
 
-    window.location.href = "/html/categories.html";
+    window.location.href = "/html/sessions.html";
   } catch (err) {
     console.error(err);
     alert("Error creating category");

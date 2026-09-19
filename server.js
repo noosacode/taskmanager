@@ -8,7 +8,7 @@ const bcrypt = require("bcrypt");
 const User = require("./backend/models/User");
 const Project = require("./backend/models/Project");
 const Task = require("./backend/models/Task");
-const Category = require("./backend/models/Category");
+const Session = require("./backend/models/Session");
 const Container = require("./backend/models/Container");
 const auth = require("./backend/middleware/auth");
 
@@ -443,7 +443,7 @@ app.post("/api/projects/:projectId/tasks", auth, async (req, res) => {
       name: req.body.name,
       details: req.body.details,
       priorityScore: req.body.priorityScore,
-      category: req.body.category || null,
+      session: req.body.session || null,
     });
 
     await task.save();
@@ -461,7 +461,7 @@ app.get("/api/tasks/:id", auth, async (req, res) => {
   try {
     const task = await Task.findById(req.params.id)
       .populate("projectId", "title")
-      .populate("category");
+      .populate("session");
 
     if (!task) {
       return res.status(404).json({
@@ -498,8 +498,8 @@ app.put("/api/tasks/:id", auth, async (req, res) => {
       updates.priorityScore = req.body.priorityScore;
     }
 
-    if (req.body.category !== undefined) {
-      updates.category = req.body.category || null;
+    if (req.body.session !== undefined) {
+      updates.session = req.body.session || null;
     }
 
     if (req.body.completed !== undefined) {
@@ -517,7 +517,7 @@ app.put("/api/tasks/:id", auth, async (req, res) => {
       runValidators: true,
     })
       .populate("projectId", "title")
-      .populate("category");
+      .populate("session");
 
     if (!task) {
       return res.status(404).json({
@@ -632,7 +632,7 @@ app.get("/api/priority-tasks", auth, async (req, res) => {
       completed: false,
     })
       .populate("projectId", "title")
-      .populate("category", "name")
+      .populate("session", "name")
       .sort({ priorityScore: -1, name: 1 });
 
     res.json(tasks);
@@ -643,10 +643,10 @@ app.get("/api/priority-tasks", auth, async (req, res) => {
   }
 });
 
-// Get Priority Tasks that have no category.
+// Get Priority Tasks that have no session.
 //
 // Useful for the Priority Tasks checkpoint.
-app.get("/api/priority-tasks/uncategorised", auth, async (req, res) => {
+app.get("/api/priority-tasks/nosession", auth, async (req, res) => {
   try {
     const tasks = await Task.find({
       priorityScore: {
@@ -654,7 +654,7 @@ app.get("/api/priority-tasks/uncategorised", auth, async (req, res) => {
         $lte: 99,
       },
       completed: false,
-      category: null,
+      session: null,
     })
       .populate("projectId", "title")
       .sort({ priorityScore: -1, name: 1 });
@@ -668,17 +668,17 @@ app.get("/api/priority-tasks/uncategorised", auth, async (req, res) => {
 });
 
 // --------------------------------------------------
-// CATEGORY ROUTES
+// SESSION ROUTES
 // --------------------------------------------------
 
-// Get all categories
-app.get("/api/categories", auth, async (req, res) => {
+// Get all sessions
+app.get("/api/sessions", auth, async (req, res) => {
   try {
-    const categories = await Category.find().sort({
+    const sessions = await Session.find().sort({
       name: 1,
     });
 
-    res.json(categories);
+    res.json(sessions);
   } catch (error) {
     res.status(500).json({
       error: error.message,
@@ -686,28 +686,28 @@ app.get("/api/categories", auth, async (req, res) => {
   }
 });
 
-// Create category
-app.post("/api/categories", auth, async (req, res) => {
+// Create session
+app.post("/api/sessions", auth, async (req, res) => {
   try {
     const name = req.body.name?.trim();
 
     if (!name) {
       return res.status(400).json({
-        message: "Category name required.",
+        message: "Session name required.",
       });
     }
 
-    const category = new Category({
+    const session = new Session({
       name,
     });
 
-    await category.save();
+    await session.save();
 
-    res.status(201).json(category);
+    res.status(201).json(session);
   } catch (error) {
     if (error.code === 11000) {
       return res.status(400).json({
-        message: "Category already exists.",
+        message: "Session already exists.",
       });
     }
 
@@ -717,53 +717,53 @@ app.post("/api/categories", auth, async (req, res) => {
   }
 });
 
-// Get one category
-app.get("/api/categories/:id", auth, async (req, res) => {
+// Get one session
+app.get("/api/sessions/:id", auth, async (req, res) => {
   try {
-    const category = await Category.findById(req.params.id);
+    const session = await Session.findById(req.params.id);
 
-    if (!category) {
+    if (!session) {
       return res.status(404).json({
-        message: "Category not found.",
+        message: "Session not found.",
       });
     }
 
-    res.json(category);
+    res.json(session);
   } catch (err) {
     console.error(err);
     res.status(500).json({
-      message: "Error loading category.",
+      message: "Error loading session.",
     });
   }
 });
 
-// Delete category
+// Delete session
 //
-// Tasks using this category are not deleted.
-// Their category is simply cleared.
-app.delete("/api/categories/:id", auth, async (req, res) => {
+// Tasks using this session are not deleted.
+// Their session is simply cleared.
+app.delete("/api/sessions/:id", auth, async (req, res) => {
   try {
-    const category = await Category.findByIdAndDelete(req.params.id);
+    const session = await Session.findByIdAndDelete(req.params.id);
 
-    if (!category) {
+    if (!session) {
       return res.status(404).json({
-        message: "Category not found.",
+        message: "Session not found.",
       });
     }
 
     await Task.updateMany(
       {
-        category: req.params.id,
+        session: req.params.id,
       },
       {
         $set: {
-          category: null,
+          session: null,
         },
       },
     );
 
     res.json({
-      message: "Category deleted.",
+      message: "Session deleted.",
     });
   } catch (error) {
     res.status(500).json({
@@ -772,21 +772,21 @@ app.delete("/api/categories/:id", auth, async (req, res) => {
   }
 });
 
-// Get tasks in a category
+// Get tasks in a session
 //
 // This is where tasks from different projects can be compared.
-app.get("/api/categories/:id/tasks", auth, async (req, res) => {
+app.get("/api/sessions/:id/tasks", auth, async (req, res) => {
   try {
-    const category = await Category.findById(req.params.id);
+    const session = await Session.findById(req.params.id);
 
-    if (!category) {
+    if (!session) {
       return res.status(404).json({
-        message: "Category not found.",
+        message: "Session not found.",
       });
     }
 
     const tasks = await Task.find({
-      category: req.params.id,
+      session: req.params.id,
       completed: false,
       priorityScore: {
         $gte: 50,

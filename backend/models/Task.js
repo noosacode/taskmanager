@@ -33,9 +33,9 @@ const TaskSchema = new mongoose.Schema(
       max: 99,
     },
 
-    category: {
+    session: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Category",
+      ref: "Session",
       default: null,
     },
 

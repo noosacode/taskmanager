@@ -126,7 +126,7 @@ saveScoresBtn.addEventListener("click", async () => {
       }
     }
 
-    window.location.href = `/html/category.html?id=${categoryId}`;
+    window.location.href = `/html/session.html?id=${categoryId}`;
   } catch (err) {
     console.error(err);
     alert("Error saving scores");
