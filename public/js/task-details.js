@@ -70,19 +70,19 @@ function renderTask(task) {
   projectLine.appendChild(projectLabel);
   projectLine.appendChild(projectLink);
 
-  const categoryLine = document.createElement("p");
-  const categoryLabel = document.createElement("strong");
-  categoryLabel.textContent = "Category: ";
+  const sessionLine = document.createElement("p");
+  const sessionLabel = document.createElement("strong");
+  sessionLabel.textContent = "Session: ";
 
-  categoryLine.appendChild(categoryLabel);
+  sessionLine.appendChild(sessionLabel);
 
-  if (task.category) {
-    const categoryLink = document.createElement("a");
-    categoryLink.href = `/html/session.html?id=${task.category._id}`;
-    categoryLink.textContent = task.category.name;
-    categoryLine.appendChild(categoryLink);
+  if (task.session) {
+    const sessionLink = document.createElement("a");
+    sessionLink.href = `/html/session.html?id=${task.session._id}`;
+    sessionLink.textContent = task.session.name;
+    sessionLine.appendChild(sessionLink);
   } else {
-    categoryLine.appendChild(document.createTextNode("None"));
+    sessionLine.appendChild(document.createTextNode("None"));
   }
 
   const createdLine = document.createElement("p");
@@ -111,7 +111,7 @@ function renderTask(task) {
   }
 
   taskInfo.appendChild(projectLine);
-  taskInfo.appendChild(categoryLine);
+  taskInfo.appendChild(sessionLine);
   taskInfo.appendChild(createdLine);
   taskInfo.appendChild(updatedLine);
 }

@@ -1,44 +1,44 @@
 // -------------------------
-// CATEGORY PAGE
+// SESSION PAGE
 // -------------------------
 
 const urlParams = new URLSearchParams(window.location.search);
-const categoryId = urlParams.get("id");
+const sessionId = urlParams.get("id");
 
 // -------------------------
 // ELEMENTS
 // -------------------------
 
-const categoryTitle = document.getElementById("category-title");
+const sessionTitle = document.getElementById("session-title");
 const tasksList = document.getElementById("tasks-list");
 
 const editScoresBtn = document.getElementById("edit-scores-btn");
 const completedTasksBtn = document.getElementById("completed-tasks-btn");
 
 // -------------------------
-// LOAD CATEGORY
+// LOAD SESSION
 // -------------------------
 
-async function loadCategory() {
+async function loadSession() {
   try {
-    const response = await fetch(`/api/categories/${categoryId}`, {
+    const response = await fetch(`/api/sessions/${sessionId}`, {
       headers: {
         Authorization: localStorage.getItem("token"),
       },
     });
 
     if (!response.ok) {
-      throw new Error("Could not load category");
+      throw new Error("Could not load session");
     }
 
-    const category = await response.json();
+    const session = await response.json();
 
-    categoryTitle.textContent = category.name;
+    sessionTitle.textContent = session.name;
 
     await loadTasks();
   } catch (err) {
     console.error(err);
-    categoryTitle.textContent = "Error loading category";
+    sessionTitle.textContent = "Error loading session";
   }
 }
 
@@ -48,7 +48,7 @@ async function loadCategory() {
 
 async function loadTasks() {
   try {
-    const response = await fetch(`/api/categories/${categoryId}/tasks`, {
+    const response = await fetch(`/api/sessions/${sessionId}/tasks`, {
       headers: {
         Authorization: localStorage.getItem("token"),
       },
@@ -105,7 +105,7 @@ function renderTasks(tasks) {
 // -------------------------
 
 editScoresBtn.addEventListener("click", () => {
-  window.location.href = `/html/category-scores.html?categoryId=${categoryId}`;
+  window.location.href = `/html/session-scores.html?sessionId=${sessionId}`;
 });
 
 // -------------------------
@@ -113,15 +113,15 @@ editScoresBtn.addEventListener("click", () => {
 // -------------------------
 
 completedTasksBtn.addEventListener("click", () => {
-  window.location.href = `/html/completed-tasks.html?categoryId=${categoryId}`;
+  window.location.href = `/html/completed-tasks.html?sessionId=${sessionId}`;
 });
 
 // -------------------------
 // START
 // -------------------------
 
-if (!categoryId) {
-  categoryTitle.textContent = "No category selected";
+if (!sessionId) {
+  sessionTitle.textContent = "No session selected";
 } else {
-  loadCategory();
+  loadSession();
 }

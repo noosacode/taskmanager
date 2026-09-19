@@ -8,30 +8,30 @@ const nameInput = document.getElementById("name");
 const descriptionInput = document.getElementById("description");
 const notesInput = document.getElementById("notes");
 
-const categorySelect = document.getElementById("category");
+const sessionSelect = document.getElementById("session");
 const statusSelect = document.getElementById("status");
 
 const backBtn = document.getElementById("back-btn");
 
-async function loadCategories() {
+async function loadSessions() {
   try {
-    const response = await fetch("/api/categories", {
+    const response = await fetch("/api/sessions", {
       headers: {
         Authorization: localStorage.getItem("token"),
       },
     });
 
     if (!response.ok) {
-      throw new Error("Could not load categories");
+      throw new Error("Could not load sessions");
     }
 
-    const categories = await response.json();
+    const sessions = await response.json();
 
-    categories.forEach((category) => {
+    sessions.forEach((session) => {
       const option = document.createElement("option");
-      option.value = category._id;
-      option.textContent = category.name;
-      categorySelect.appendChild(option);
+      option.value = session._id;
+      option.textContent = session.name;
+      sessionSelect.appendChild(option);
     });
   } catch (err) {
     console.error(err);
@@ -58,10 +58,10 @@ async function loadTask() {
     descriptionInput.value = task.description || "";
     notesInput.value = task.notes || "";
 
-    if (task.category) {
-      categorySelect.value = task.category._id;
+    if (task.session) {
+      sessionSelect.value = task.session._id;
     } else {
-      categorySelect.value = "";
+      sessionSelect.value = "";
     }
 
   } catch (err) {
@@ -88,7 +88,7 @@ form.addEventListener("submit", async (event) => {
         name,
         description,
         notes,
-        category: categorySelect.value || null,
+        session: sessionSelect.value || null,
       }),
     });
 
@@ -110,6 +110,6 @@ backBtn.addEventListener("click", () => {
 if (!taskId) {
   taskTitle.textContent = "No task selected";
 } else {
-  loadCategories();
+  loadSessions();
   loadTask();
 }

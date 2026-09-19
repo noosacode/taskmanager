@@ -1,11 +1,11 @@
 // -------------------------
-// CREATE CATEGORY PAGE
+// CREATE SESSION PAGE
 // -------------------------
 
-const form = document.getElementById("create-category-form");
+const form = document.getElementById("create-session-form");
 
 // -------------------------
-// CREATE CATEGORY
+// CREATE SESSION
 // -------------------------
 
 form.addEventListener("submit", async (event) => {
@@ -14,7 +14,7 @@ form.addEventListener("submit", async (event) => {
   const name = document.getElementById("name").value.trim();
 
   try {
-    const response = await fetch("/api/categories", {
+    const response = await fetch("/api/sessions", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -26,12 +26,12 @@ form.addEventListener("submit", async (event) => {
     });
 
     if (!response.ok) {
-      throw new Error("Could not create category");
+      throw new Error("Could not create session");
     }
 
     window.location.href = "/html/sessions.html";
   } catch (err) {
     console.error(err);
-    alert("Error creating category");
+    alert("Error creating session");
   }
 });
